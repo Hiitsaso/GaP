@@ -12,16 +12,49 @@
 
 G4ThreeVector random_generator_inside_drift(){
 	
-	G4double cathode_z = 90.1125*mm - 15.745*mm;
 	G4double mesh_thickn_       = 0.075   *mm;
 	G4double meshBracket_thickn_   = 6.      *mm;
 	G4double drift_length_  = 96.*mm - meshBracket_thickn_ ;
+	G4double anodeBracket_thickn_  = 6.975   *mm;
+	G4double anodeBracket_z = 16.52*mm + meshBracket_thickn_ + anodeBracket_thickn_/2;
+	G4double gateBracket_z = -anodeBracket_z + 9.05*mm + meshBracket_thickn_/2 + anodeBracket_thickn_/2;
+	G4double cathode_z = gateBracket_z + 14.8 *mm  + meshBracket_thickn_;
 	G4double drift_z = cathode_z - mesh_thickn_/2 - drift_length_/2;
 	G4double meshBracket_rad_      = 180./2  *mm;
+	
+	//G4double cathode_z = 90.1125*mm - 15.745*mm;
 	
 	G4double r = G4RandFlat::shoot( 0., meshBracket_rad_);
 	G4double angle = G4RandFlat::shoot( 0., 2*M_PI);
 	G4double z = G4RandFlat::shoot(-drift_length_/2 + drift_z, drift_length_/2 + drift_z);
+	
+    G4double pos_x = r * cos(angle);
+    G4double pos_y = r * sin(angle);
+    G4double pos_z = z;
+   
+	G4ThreeVector position = G4ThreeVector(pos_x, pos_y, pos_z);
+    
+    return position;
+}
+
+G4ThreeVector random_generator_inside_drift_setZ(G4int eventCounter, G4double z){
+	
+	G4double mesh_thickn_       = 0.075   *mm;
+	G4double meshBracket_thickn_   = 6.      *mm;
+	G4double drift_length_  = 96.*mm - meshBracket_thickn_ ; //90mm
+	G4double anodeBracket_thickn_  = 6.975   *mm; 
+	G4double anodeBracket_z = 16.52*mm + meshBracket_thickn_ + anodeBracket_thickn_/2; //26.0075mm
+	G4double gateBracket_z = -anodeBracket_z + 9.05*mm + meshBracket_thickn_/2 + anodeBracket_thickn_/2; //-10.47mm
+	G4double cathode_z = gateBracket_z + 14.8 *mm  + meshBracket_thickn_; //10.33
+	G4double drift_z = cathode_z - mesh_thickn_/2 - drift_length_/2; // -34.7075
+	G4double meshBracket_rad_      = 180./2  *mm;
+	
+	G4double r = G4RandFlat::shoot( 0., meshBracket_rad_);
+	G4double angle = G4RandFlat::shoot( 0., 2*M_PI);
+	
+	if (eventCounter % 100000 == 0){
+		z += 0.925*mm;	
+	}
 	
     G4double pos_x = r * cos(angle);
     G4double pos_y = r * sin(angle);

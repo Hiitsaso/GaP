@@ -18,6 +18,8 @@
 
 #include <iostream>
 
+#include "detector.hh"
+
 G4PVPlacement* geometry() {
 	
 		auto model_new_= 1;
@@ -62,8 +64,8 @@ G4PVPlacement* geometry() {
 
 		G4double pressure_          (10.* bar);
 		G4double temperature_       (293. * kelvin);
-		//G4double sc_yield_          (22222./MeV); // Wsc = 45 eV, fr
-	    G4double sc_yield_          (1./GeV); 
+		G4double sc_yield_          (22222./MeV); // Wsc = 45 eV, fr
+	    //G4double sc_yield_          (1./GeV); 
 	    //G4double sc_yield_          (1000./MeV); 
 		G4double elifetime_         (1e6* ms);
 		G4double drift_vel_         (1. * mm/microsecond);
@@ -77,6 +79,7 @@ G4PVPlacement* geometry() {
 		auto Cu = n4::material("G4_Cu");
 		auto vacuum = n4::material("G4_Galactic");
 		auto steel = n4::material("G4_STAINLESS-STEEL");
+		auto aluminum = n4::material("G4_Al");
 		
 		auto gas_ = GAr_with_properties( pressure_, temperature_, sc_yield_, elifetime_);  
 	    auto mesh_mat = FakeDielectric_with_properties(gas_, "mesh_mat", 
@@ -105,6 +108,8 @@ G4PVPlacement* geometry() {
         G4LogicalVolume * gas_el;
         G4double drift_length_  ;
         G4double el_length_    ;
+        G4double anodeBracket_z = 16.52*mm + meshBracket_thickn_ + anodeBracket_thickn_/2;
+        G4double gateBracket_z = -anodeBracket_z + 9.05*mm + meshBracket_thickn_/2 + anodeBracket_thickn_/2;
         
         if (model_new_ == 0) {
         
@@ -152,7 +157,6 @@ G4PVPlacement* geometry() {
         G4double drift_z = cathode_z - mesh_thickn_/2 - drift_length_/2;
         n4::place(gas_drift).in(vessel).at({0, 0, drift_z}).check(true).now();
         
- 
         // EL gap
         auto gas_el = n4::volume<G4Tubs>("gas_el", gas_, 0, anodeBracket_rad_, (el_length_)/2, 0., 360.*deg);
         G4double el_z = drift_z - drift_length_/2 - el_length_/2;
@@ -163,28 +167,39 @@ G4PVPlacement* geometry() {
                
         //Cathode 
         auto cathode = n4::volume<G4Tubs>("cathode", mesh_mat, 0, mesh_rad_, (mesh_thickn_)/2, 0., 360.*deg);
-        G4double cathode_z = 4.505*mm + mesh_thickn_/2;  //cathode center from vessel center
-        n4::place(cathode).in(vessel).at({0, 0, cathode_z}).check(true).now();
-        
+        //G4double cathode_z = 4.505*mm + mesh_thickn_/2;  //cathode center from vessel center        
         //Cathode Bracket 
         auto cathBracket = n4::volume<G4Tubs>("CathodeBracket", steel, mesh_rad_, meshBracket_rad_, (meshBracket_thickn_)/2, 0., 360.*deg);
-        G4double cathBracket_z = 8.005*mm - meshBracket_thickn_/2;
+        //old version, berfore fixing the GaP:
+        //G4double cathBracket_z = 8.005*mm - meshBracket_thickn_/2;
+        //new version:
+        G4double cathBracket_z = gateBracket_z + 14.8 *mm  + meshBracket_thickn_;
         n4::place(cathBracket).in(vessel).at({0, 0, cathBracket_z}).check(true).now();
-        
+        n4::place(cathode).in(vessel).at({0, 0, cathBracket_z}).check(true).now();
+
         //Gas
-		G4double drift_length_  = 19.825*mm - mesh_thickn_ ;
-        G4double el_length_     = 10.775*mm + mesh_thickn_;
-              
+        //old version, before fixing the GaP:
+		//G4double drift_length_  = 19.825*mm - mesh_thickn_ ;
+        //G4double el_length_     = 10.775*mm + mesh_thickn_;
+        G4double drift_length_  =  14.8*mm + meshBracket_thickn_;
+        G4double el_length_  =  9.05*mm + meshBracket_thickn_/2  +  anodeBracket_thickn_/2;
+        
+        
         // Drift
         auto gas_drift = n4::volume<G4Tubs>("gas_drift", gas_, 0, anodeBracket_rad_, (drift_length_)/2, 0., 360.*deg);
-        G4double drift_z = cathode_z - mesh_thickn_/2 - drift_length_/2;
+        //old version, berfore fixing the GaP:
+        //G4double drift_z = cathode_z - mesh_thickn_/2 - drift_length_/2;
+        //new version:
+        G4double drift_z = gateBracket_z + drift_length_/2;
         n4::place(gas_drift).in(vessel).at({0, 0, drift_z}).check(true).now();
-        
  
         // EL gap
         //auto gas_el = n4::volume<G4Tubs>("gas_el", gas_, 0, mesh_rad_, (el_length_)/2, 0., 360.*deg);
         auto gas_el = n4::volume<G4Tubs>("gas_el", gas_, 0, anodeBracket_rad_, (el_length_)/2, 0., 360.*deg);
-        G4double el_z = drift_z - drift_length_/2 - el_length_/2;
+        //old version, berfore fixing the GaP: 
+        //G4double el_z = drift_z - drift_length_/2 - el_length_/2;
+        //new version:
+        G4double el_z = -anodeBracket_z + el_length_/2;
         n4::place(gas_el).in(vessel).at({0, 0, el_z}).check(true).now();
         //el_gen_  = new CylinderPointSampler2020(el_phys_);
         
@@ -193,13 +208,15 @@ G4PVPlacement* geometry() {
         
         // Gate
         auto gate = n4::volume<G4Tubs>("gate", mesh_mat, 0, mesh_rad_, (mesh_thickn_)/2, 0., 360.*deg);
-        G4double gate_z = el_length_/2 - mesh_thickn_/2;
-        n4::place(gate).in(gas_el).at({0, 0, gate_z}).check(true).now();
-        
+        //G4double gate_z = el_length_/2 - mesh_thickn_/2;        
         // Gate Bracket
         auto gateBracket= n4::volume<G4Tubs>("gateBracket", steel, mesh_rad_, meshBracket_rad_, (meshBracket_thickn_)/2, 0., 360.*deg);
-        G4double gateBracket_z = 12.745*mm + meshBracket_thickn_/2;
-        n4::place(gateBracket).in(vessel).at({0, 0, -gateBracket_z}).check(true).now();
+        //old version, berfore fixing the GaP:
+        //G4double gateBracket_z = 12.745*mm + meshBracket_thickn_/2;
+        //new version: declared befor the if
+       // G4double gateBracket_z = -gateBracket_z + 9.05*mm + meshBracket_thickn_/2 + anodeBracket_thickn_/2;
+        n4::place(gateBracket).in(vessel).at({0, 0, gateBracket_z}).check(true).now();
+        n4::place(gate).in(vessel).at({0, 0, gateBracket_z}).check(true).now();
         
         G4RotationMatrix* Rot45 = new G4RotationMatrix();
         Rot45->rotateZ(45*deg);
@@ -212,14 +229,17 @@ G4PVPlacement* geometry() {
         
         //Anode
         auto anode = n4::volume<G4Tubs>("Anode", mesh_mat, 0.,  mesh_rad_, (mesh_thickn_)/2, 0., 360.*deg);
-        G4double anode_z = - el_length_/2 + mesh_thickn_/2;
-        n4::place(anode).in(gas_el).at({0., 0., anode_z}).check(true).now();
-        
+		//G4double anode_z = - el_length_/2 + mesh_thickn_/2; //The Anode was placed in the gas_el = error since it is defined inside a else :(      
         //Anode Bracket
         auto anodeBracket = n4::volume<G4Tubs>("AnodeBracket", steel, mesh_rad_, anodeBracket_rad_, (anodeBracket_thickn_)/2, 0., 360.*deg);
-        G4double anodeBracket_z = gateBracket_z + meshBracket_thickn_/2 + 3.775*mm + anodeBracket_thickn_/2;
+        //old version, berfore fixing the GaP:
+        //G4double anodeBracket_z = gateBracket_z + meshBracket_thickn_/2 + 3.775*mm + anodeBracket_thickn_/2; 
+        //new version, the value is the same for the anodeBracket_z, but it changes for gateBracket_z. So this value works for both versions:
+        //declared before the if
+        //G4double anodeBracket_z = 16.52*mm + meshBracket_thickn_ + anodeBracket_thickn_/2;
         n4::place(anodeBracket).in(vessel).at({0., 0., -anodeBracket_z}).check(true).now();
-      
+		n4::place(anode).in(vessel).at({0., 0., -anodeBracket_z}).check(true).now();
+		
         // Peek Anode Holder
 		G4double anodeHolder_length_  = 30        *mm;
 		G4double anodeHolder_rad_     = 145.001/2 *mm;
@@ -306,10 +326,17 @@ G4PVPlacement* geometry() {
         //G4double pmt_length_ = pmt_.Length();
         G4double pmt_length_ = 43.0 * mm;
         G4double pmt_z  = 42.495*mm + pmt_length_/2;
-
+        
         G4Tubs *solid_pmt = new G4Tubs("SolidPMT", 0., pmt_rad_, pmt_length_/2, 0., 360.*deg); // Hamamatsu pmt length: 43*mm | STEP pmt gap length: 57.5*mm
-      
-        // Position pairs (x,Y) for PMTs
+		G4LogicalVolume * logic_pmt = new G4LogicalVolume(solid_pmt, aluminum, "PMT");
+        
+		auto end_of_event = [](G4HCofThisEvent *what){
+		};
+		
+		auto sensitive_detector = new n4::sensitive_detector("DetectorPMT", process_hits,  end_of_event);	
+		logic_pmt -> SetSensitiveDetector(sensitive_detector);
+		
+        
         std::vector <float> pmt_PsX={-15.573, 20.68, -36.253, 0., 36.253, -20.68, 15.573};
         std::vector <float> pmt_PsY={-32.871, -29.922, -2.949, 0., 2.949, 29.922, 32.871};
        
@@ -344,6 +371,8 @@ G4PVPlacement* geometry() {
 		 G4VSolid*solid_pmtHolder = new G4SubtractionSolid("PMTHolder_Sub", solid_pmtHolder, solid_pmt,  0, pos);
 		 G4VSolid*solid_plate1_pmt = new G4SubtractionSolid("PMTplateBottom1_Sub", solid_plate1_pmt, solid_pmt,  0, pos);
 
+		 n4::place(logic_pmt).in(vessel).at(pos_pmt).copy_no(i).now();
+		
         }
        
        G4LogicalVolume *logic_enclosure_pmt = new G4LogicalVolume(solid_enclosure_pmt, steel, "EnclosurePMT");

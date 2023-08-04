@@ -218,6 +218,7 @@ G4MaterialPropertiesTable* TPB_properties(){
    // WLS EMISSION SPECTRUM
    // Implemented with formula (7), with parameter values in table (3)
    // Sampling from ~380 nm to 600 nm <--> from 2.06 to 3.26 eV
+   
    const G4int WLS_emi_entries = 120;
    std::vector<G4double> WLS_emi_energy;
    for (int i=0; i<WLS_emi_entries; i++)
@@ -244,7 +245,7 @@ G4MaterialPropertiesTable* TPB_properties(){
    
   return n4::material_properties()
 	.add("RINDEX", rIndex_energies, TPB_rIndex)
-	.add("ABSLENGTH", abs_energy, abs_energy)
+	.add("ABSLENGTH", abs_energy, absLength)
 	.add("WLSABSLENGTH", WLS_abs_energy, WLS_absLength)
 	.add("WLSCOMPONENT", WLS_emi_energy, WLS_emiSpectrum)
 	.add("WLSTIMECONSTANT",  1.2 * ns)  // WLS Delay

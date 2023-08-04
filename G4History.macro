@@ -85,6 +85,3 @@
 /vis/viewer/set/autoRefresh true
 /vis/viewer/refresh
 /vis/verbose warnings
-/vis/disable
-/run/beamOn 100000
-/run/beamOn 100
