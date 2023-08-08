@@ -34,6 +34,7 @@
 #include <G4VisAttributes.hh>
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
+#include <G4GenericMessenger.hh>
 
 #include <chrono>
 #include <cmath>
@@ -357,7 +358,13 @@ int main(int argc, char *argv[]) {
     physics_list -> RegisterPhysics(new G4RadioactiveDecayPhysics);
     physics_list -> RegisterPhysics(new G4DecayPhysics());
 
-
+	auto generic_messenger = new G4GenericMessenger(nullptr,"/beam/", "Particle beam generator");
+	G4double fixed_z = 0.*mm;
+	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
+	G4String particleDefinition = "opticalphoton";
+	generic_messenger -> DeclareProperty("particleDefinition", particleDefinition,"Type of the generated particle");
+	
+	
     auto run_manager = std::unique_ptr<G4RunManager>
         {G4RunManagerFactory::CreateRunManager(G4RunManagerType::Serial)};
 
@@ -365,7 +372,7 @@ int main(int argc, char *argv[]) {
     run_manager -> SetUserInitialization(physics_list);
     
     //G4ParticleTable needs to be call after G4VUserPhysicsList is instantiated and assigned to G4RunManager
-    auto opticalphoton = [](auto event){generate_particles_in_event(event, random_generator_inside_drift({}), generate_partilces_and_energies_tuples());};   	
+    auto opticalphoton = [&fixed_z, &particleDefinition](auto event){generate_particles_in_event(event, random_generator_inside_drift(fixed_z), generate_partilces_and_energies_tuples(particleDefinition));};   	
 		//auto box_source = [](auto event){generate_particles_in_event(event, {0., 0., 167.6775*mm + 50.*mm}, generate_partilces_and_energies_tuples());};  //From the box_source
 		//auto kr83m = [](auto event){generate_ion_decay(event, random_generator_inside_drift({}), 0);}; 
 		//auto kr83m_nexus= [](auto event){ kr83_generator(event, 32.1473*keV, 9.396*keV,  0.0490, 154.*ns); }; 
@@ -379,7 +386,7 @@ int main(int argc, char *argv[]) {
                                                 //-> set((new n4::event_action) -> end(write_energy_event) -> begin(reset_energy))
                                                 -> set((new n4::run_action) -> begin(delete_file_map_and_reset_eventCounter)));
                                                 
-     run_manager -> SetUserInitialization(new n4::geometry{geometry});
+    run_manager -> SetUserInitialization(new n4::geometry{geometry});  
 
     // auto world = get_world();
     // //auto& place_something_in = place_mesh_holder_in;

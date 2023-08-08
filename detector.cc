@@ -16,7 +16,7 @@ bool process_hits(G4Step *step){
 	
 	G4cout << "*************************************  :)  " << particleType << "  (:  *************************************"  << G4endl;   
 	
-	if (particleType == "e-"){ //opticalphoton (not now because it doesn't work, abs)
+	if (particleType == "opticalphoton"){ //opticalphoton (not now because it doesn't work, abs)
 	track -> SetTrackStatus(fStopAndKill);
 	
 	hits_check = 1;

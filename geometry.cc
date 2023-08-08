@@ -307,7 +307,8 @@ void place_pmt_holder_in(G4LogicalVolume* vessel) {
 
 field_cage_parameters model_something_old() {
   field_cage_parameters fcp;
-
+   
+  //Cathode 
   fcp.cathode_z = (90.1125 - 15.745)*mm;  //cathode center from vessel center
   //auto cathode_z = 4.505*mm + mesh_thickn/2 + 2*D + 5*d + 6*ring_thickn;  //cathode center from vessel center
 
@@ -329,6 +330,7 @@ field_cage_parameters model_something_old() {
 field_cage_parameters model_something_new() {
   field_cage_parameters fcp;
 
+  //Cathode
   fcp.cathode_z = 4.505*mm + mesh_thickn/2;  //cathode center from vessel center
 
   //Cathode Bracket
@@ -373,7 +375,7 @@ void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters cons
   // EL gap
   auto el_z = fcp.drift_z - fcp.drift_length/2 - fcp.el_length/2;
   auto gas_el = n4::tubs("gas_el").r(anodeBracket_rad).z(fcp.el_length).volume(gas);
-  n4::place(gas_el).in(vessel).at_z(el_z).check_overlaps().now();
+  n4::place(gas_el).in(vessel).at_z(el_z).check_overlaps().now(); 
 
   // Gate
   auto gate_z = fcp.el_length/2 - mesh_thickn/2;
@@ -429,6 +431,7 @@ G4PVPlacement* geometry() {
   n4::place(vessel).in(vessel_steel).check_overlaps().now();
 
   field_cage_parameters fcp = (use_new_model) ? model_something_new() : model_something_old();
+  G4cout << "Debug message" << G4endl;
 
   if (use_new_model) {} else { place_rings_in(vessel, fcp); }
 
@@ -475,3 +478,4 @@ G4PVPlacement* geometry() {
   }
   return n4::place(world).now();
 }
+

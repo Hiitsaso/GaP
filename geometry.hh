@@ -31,5 +31,4 @@ void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters cons
 
 G4PVPlacement* geometry();
 
-
 #endif
