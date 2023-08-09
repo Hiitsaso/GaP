@@ -59,8 +59,8 @@ int main(int argc, char *argv[]) {
     G4int  eventCounter;
     std::vector<int> trackIDVector;
     
-    const std::string& filename_event = "EnergyDepositTotal_Kr83m_10bar_sum_withoutTransportation_G4.txt";
-    const std::string& filename_step = "EnergyDepositTotal_Kr83m_10bar_sum_withoutTransportation.txt";
+    const std::string& filename_event = "HELP.txt";
+    const std::string& filename_step = "HELP.txt";
     
     const std::string& filename_event_1 = "EnergyDepositTotal_Kr83m_10bar_sum_withoutTransportation.txt";
     const std::string& filename_event_2 = "EnergyDepositTotal_Kr83m_10bar_sum_justCompton.txt";
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 
         G4Track* track = step->GetTrack();
 
-        if (step -> GetPreStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName() == "gas_drift") {
+        //if (step -> GetPreStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName() == "gas_drift") {
             // auto energy_deposit_step_pre  = step -> GetPreStepPoint()  -> GetTotalEnergy();
             // auto energy_deposit_step_post = step -> GetPostStepPoint() -> GetTotalEnergy();
             auto energy_kinetic = step->GetPreStepPoint()->GetKineticEnergy();
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
             const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
             G4String interactionType = process->GetProcessName();
 
-            if (energy_deposit_step != 0.0 && interactionType!= "Transportation") {
+            //if (energy_deposit_step != 0.0 && interactionType!= "Transportation") {
                 if (energy_deposit_step != 0.0) {
                     energy_deposit_total += energy_deposit_step;
                     counts++;
@@ -131,8 +131,8 @@ int main(int argc, char *argv[]) {
                     file.close();
                 }
 
-            }
-        }
+            //}
+        //}
     };
     
     [[maybe_unused]]
@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
 	auto generic_messenger = new G4GenericMessenger(nullptr,"/beam/", "Particle beam generator");
 	G4double fixed_z = 0.*mm;
 	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
-	G4String particleDefinition = "opticalphoton";
+	G4String particleDefinition = "gamma";
 	generic_messenger -> DeclareProperty("particleDefinition", particleDefinition,"Type of the generated particle");
 	
 	
@@ -381,7 +381,7 @@ int main(int argc, char *argv[]) {
 
     
     run_manager -> SetUserInitialization((new n4::actions{opticalphoton})
-                                                //-> set(new n4::stepping_action{write_info_and_get_energy_step})
+                                                -> set(new n4::stepping_action{write_info_and_get_energy_step})
                                                 //-> set((new n4::tracking_action) -> post(create_trackIDVector) -> pre(delete_track)
                                                 //-> set((new n4::event_action) -> end(write_energy_event) -> begin(reset_energy))
                                                 -> set((new n4::run_action) -> begin(delete_file_map_and_reset_eventCounter)));

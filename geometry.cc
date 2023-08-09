@@ -98,8 +98,9 @@ void ensure_initialized() {
 
   gas      = GAr_with_properties( pressure, temperature, sc_yield, elifetime);
   mesh_mat = FakeDielectric_with_properties(gas, "mesh_mat",
-                                            pressure, temperature, mesh_transparency, mesh_thickn,
-                                            sc_yield, elifetime, photoe_prob);
+                                           pressure, temperature, mesh_transparency, mesh_thickn,
+                                           sc_yield, elifetime, photoe_prob);
+  //mesh_mat = n4::material("G4_AIR");
   peek   = peek_with_properties();
   quartz = quartz_with_properties();
   tpb    = TPB_with_properties();

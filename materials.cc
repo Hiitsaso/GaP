@@ -93,7 +93,7 @@ G4Material* FakeDielectric_with_properties(G4Material* model_mat, G4String name,
                                         thickness,
                                         sc_yield,
                                         e_lifetime,
-                                        photoe_p));    
+                                        photoe_p));                                                         
  return mesh_mat;
  
 }               

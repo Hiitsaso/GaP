@@ -28,6 +28,7 @@
 #include "G4OpticalPhoton.hh"
 #include "G4Electron.hh"
 #include "G4Gamma.hh"
+#include "G4Geantino.hh"
 
 G4double vessel_out_rad_    = 288./2  *mm;
 G4double vessel_out_length_ = 46.679  *cm;
@@ -154,6 +155,8 @@ std::vector<std::tuple<G4ParticleDefinition*, G4double>> generate_partilces_and_
 	if (particletype == "opticalphoton"){particleDefinition = G4OpticalPhoton::Definition();}
 	else if (particletype == "e-"){particleDefinition = G4Electron::Definition();}
 	else if (particletype == "gamma"){particleDefinition = G4Gamma::Definition();}
+	else if (particletype == "geantino"){particleDefinition = G4Geantino::Definition();}
+	else if (particletype == "geantino"){particleDefinition = G4Geantino::Definition();}
 	else { throw "Unknown particle type: " + particletype; }
 	particles_and_energies.push_back(std::make_tuple(particleDefinition, 100. * keV));
 	
