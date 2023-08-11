@@ -18,8 +18,9 @@
 #include <vector>
 
 using namespace CLHEP;
+using vec_double = std::vector<G4double>;
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////// OK
 
 G4Material* peek_with_properties() {
   auto peek = n4::material_from_elements_N("peek", 1.30*g/cm3, kStateSolid,{{"H", 12},{"C" , 18},{"O", 3}});
@@ -27,7 +28,15 @@ G4Material* peek_with_properties() {
   return peek;
 }
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////// OK
+
+G4Material* aluminum_with_properties() {
+  auto aluminum = n4::material("G4_Al");
+  aluminum -> SetMaterialPropertiesTable(aluminum_properties()) ;
+  return aluminum;
+}
+
+//////////////////////////////////////////////////////////////////////// OK
 
 G4Material* quartz_with_properties() {
   auto quartz = n4::material("G4_SILICON_DIOXIDE");  
@@ -35,7 +44,7 @@ G4Material* quartz_with_properties() {
   return quartz;
 }
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////// 
 
 G4Material* TPB_with_properties() {
   auto tpb = n4::material_from_elements_N("TPB", 1.*g/cm3, kStateSolid,{{"H", 22},{"C" , 28}});
@@ -100,10 +109,10 @@ G4Material* FakeDielectric_with_properties(G4Material* model_mat, G4String name,
                  
 ////////////////////////////////////////////////////////////////////////
  
- G4Material* GAr_with_properties(G4double pressure, G4double temperature, G4double sc_yield, G4double e_lifetime){
+G4Material* GAr_with_properties(G4double pressure, G4double temperature, G4double sc_yield, G4double e_lifetime){
 
   G4double density = 1.60279 * (pressure / bar) * (300 * kelvin) / temperature * kg/m3; // 1.60729 is the pressure at 1 bar and 300K
-
+	
   auto GAr = n4::material_from_elements_N("GAr", density, kStateGas,{{"Ar", 1}});
   GAr -> SetMaterialPropertiesTable(GAr_properties(sc_yield, e_lifetime)) ;
   return GAr; 
@@ -112,5 +121,16 @@ G4Material* FakeDielectric_with_properties(G4Material* model_mat, G4String name,
 
 ////////////////////////////////////////////////////////////////////////
 
-
+G4Material* air_with_properties() {
+	// TODO: remove duplication of hc (defined in moth materials.cc and geometry.cc)
+	const G4double hc = CLHEP::h_Planck * CLHEP::c_light;
+	const vec_double OPTPHOT_ENERGY_RANGE{1*eV, 8.21*eV};
+	
+    auto air = n4::material("G4_AIR");
+    G4MaterialPropertiesTable *mpt_air = n4::material_properties()
+        .add("RINDEX", OPTPHOT_ENERGY_RANGE, {1, 1})
+        .done();
+    air -> SetMaterialPropertiesTable(mpt_air);
+    return air;
+}
 

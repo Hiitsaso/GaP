@@ -29,9 +29,15 @@ const G4double optPhotMinWL_  = optPhotMaxE_ * nm / c4::hc;
 const G4double noAbsLength_   = 1.e8  * m;
 const vecd     optPhotRangeE_ = {optPhotMinE_, optPhotMaxE_};
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////// OK
 G4MaterialPropertiesTable* peek_properties(){ return n4::material_properties().done(); }
 
+//////////////////////////////////////////////////////////////////////// OK
+G4MaterialPropertiesTable* aluminum_properties(){ 
+	return n4::material_properties()
+		.add("RINDEX",  {9.686*eV}, {0.12397})
+		.done(); 
+}
 
 ////////////////////////////////////////////////////////////////////////
 G4MaterialPropertiesTable* GXe_properties(G4double pressure,
@@ -63,7 +69,8 @@ G4MaterialPropertiesTable* GXe_properties(G4double pressure,
   //         << " eV -> " << intensity[i] << G4endl;
   //}
 
-
+ 
+ //std::cerr << "************************** :)  " << optPhotRangeE_[170] << " " << optPhotRangeE_[160] << std::endl;
   return n4::material_properties()
     .add("RINDEX"                    , ri_energy, rIndex)
     .add("ABSLENGTH"                 , optPhotRangeE_, noAbsLength_)
@@ -81,7 +88,7 @@ G4MaterialPropertiesTable* GXe_properties(G4double pressure,
 
 }
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////// OK
 G4MaterialPropertiesTable* quartz_properties(){
 
   // REFRACTIVE INDEX
@@ -89,6 +96,7 @@ G4MaterialPropertiesTable* quartz_properties(){
   // for fused silica is valid only in that range
   const size_t ri_entries = 200;
   auto ri_energy = n4::linspace(optPhotMinE_, optPhotMaxE_, ri_entries);
+  
 
   // The following values for the refractive index have been calculated
   // using Sellmeier's equation:
@@ -106,15 +114,35 @@ G4MaterialPropertiesTable* quartz_properties(){
     auto C_1 = 1.30e-2;
     auto C_2 = 4.13e-3;
     auto C_3 = 9.88e+1;
-
-    auto lambda  = c4::hc / e / nm * um; // in micron
+	//~ G4cout << e << G4endl;
+    auto lambda  = c4::hc / e / nm * um; // in micron   
+    //~ G4cout << lambda << G4endl;
+    //~ G4cout << c4::hc << G4endl;
     auto lambda2 = std::pow(lambda, 2);
+    //~ G4cout << lambda2 << G4endl;
     auto n2 = 1 + lambda2 * ( B_1 / (lambda2 - C_1)
                             + B_2 / (lambda2 - C_2)
                             + B_3 / (lambda2 - C_3));
-    return std::sqrt(n2);
+    //~ G4cout << n2 << G4endl;    
+    G4double result;
+    
+    if (n2 >0){result = std::sqrt(n2);}
+    else {result = 1e+11;}
+    
+    //~ G4cout << result << G4endl; 
+    
+    return result;
   };
-
+  
+  //const std::string& filename = "ri_energy_vector_function.txt";
+  //std::ofstream file;
+  //file.open (filename, std::ios::app);
+  //~ for (size_t i = 0; i < ri_energy.size(); i++) {
+			//~ G4double result = ref_index_sellmeier(ri_energy[i]);
+			//~ G4cout << "ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo " << result << " oooooooooooooooooooooooooooooooooooooooooooooooooo" << G4endl;          
+  //~ }
+  //file.close();
+  
   auto rIndex = n4::map<G4double>(ref_index_sellmeier, ri_energy);
 
   // for (int i=0; i<ri_entries; i++) {
@@ -141,10 +169,15 @@ G4MaterialPropertiesTable* quartz_properties(){
                    .4,     .37,     .32,     .28,     .22,    .215,   5e-5 ,
     5e-5
     });
+  
+  for (size_t i = 0; i < abs_energy.size(); i++) {
+			G4cout << abs_energy[i] * 1000000 << " //// " << absLength[i] <<"         <--------------------------------------------------" << G4endl;          
+  }
 
   return n4::material_properties()
     .add("RINDEX"   ,  ri_energy, rIndex)
     .add("ABSLENGTH", abs_energy, absLength)
+    //.NEW("WORK_FUNCTION", 4.823*eV) //Not defined in the original code
     .done();
 
 }
@@ -198,7 +231,6 @@ G4MaterialPropertiesTable* TPB_properties() {
   return n4::material_properties()
     .add("RINDEX"               , optPhotRangeE_, 1.67)
     // Assuming no absorption except WLS
-    // .add("ABSLENGTH"            , abs_energy, abs_energy) // ??????????????????????
     .add("ABSLENGTH"            , optPhotRangeE_, noAbsLength_) // Wrong argument replaced (see previous line)
     .add("WLSABSLENGTH"         , WLS_abs_energy, WLS_absLength)
     .add("WLSCOMPONENT"         , WLS_emi_energy, WLS_emiSpectrum)
@@ -209,42 +241,6 @@ G4MaterialPropertiesTable* TPB_properties() {
     // to Xe scintillation spectrum peak.
     .done();
 }
-
-///////////////////////////////////////////////////////////////////////
-
-G4MaterialPropertiesTable* FakeDielectric_properties(G4double pressure,
-                                                     G4double temperature,
-                                                     G4double transparency,
-                                                     G4double thickness,
-                                                     G4int    sc_yield,
-                                                     G4double e_lifetime,
-                                                     G4double photoe_p){
-   // ABSORPTION LENGTH
-   G4double abs_length = -thickness/log(transparency);
-
-   // PHOTOELECTRIC REEMISSION
-   // https://aip.scitation.org/doi/10.1063/1.1708797
-   G4double stainless_wf = 4.3 * eV; // work function
-
-   G4MaterialPropertiesTable* xenon_pt = GXe_properties(pressure, temperature, sc_yield, e_lifetime);
-   return n4::material_properties()
-     .add("ABSLENGTH"                   , optPhotRangeE_, abs_length)
-     .NEW("WORK_FUNCTION"               ,                 stainless_wf)
-     .NEW("OP_PHOTOELECTRIC_PROBABILITY",                 photoe_p)
-     .copy_from(xenon_pt, {
-       "SCINTILLATIONCOMPONENT1",
-       "SCINTILLATIONCOMPONENT2"})
-     .copy_NEW_from(xenon_pt, {
-       "SCINTILLATIONTIMECONSTANT1",
-       "SCINTILLATIONTIMECONSTANT2",
-       "SCINTILLATIONYIELD",
-       "SCINTILLATIONYIELD1",
-       "SCINTILLATIONYIELD2",
-       "RESOLUTIONSCALE",
-       "ATTACHMENT"})
-     .done();
-}
-
 ////////////////////////////////////////////////////////////////////////
 G4MaterialPropertiesTable* GAr_properties(G4double sc_yield, G4double e_lifetime){
   //e_lifetime = 1000.*ms;
@@ -307,3 +303,40 @@ G4MaterialPropertiesTable* GAr_properties(G4double sc_yield, G4double e_lifetime
     .NEW("ATTACHMENT"                ,                   e_lifetime)
     .done();
 }
+
+///////////////////////////////////////////////////////////////////////
+
+G4MaterialPropertiesTable* FakeDielectric_properties(G4double pressure,
+                                                     G4double temperature,
+                                                     G4double transparency,
+                                                     G4double thickness,
+                                                     G4int    sc_yield,
+                                                     G4double e_lifetime,
+                                                     G4double photoe_p){
+   // ABSORPTION LENGTH
+   G4double abs_length = -thickness/log(transparency);
+
+   // PHOTOELECTRIC REEMISSION
+   // https://aip.scitation.org/doi/10.1063/1.1708797
+   G4double stainless_wf = 4.3 * eV; // work function
+
+   G4MaterialPropertiesTable* xenon_pt = GAr_properties(sc_yield, e_lifetime);
+   return n4::material_properties()
+     .add("ABSLENGTH"                   , optPhotRangeE_, abs_length)
+     .NEW("WORK_FUNCTION"               ,                 stainless_wf)
+     .NEW("OP_PHOTOELECTRIC_PROBABILITY",                 photoe_p)
+     .copy_from(xenon_pt, {
+       "SCINTILLATIONCOMPONENT1",
+       "SCINTILLATIONCOMPONENT2",
+       "RINDEX"})
+     .copy_NEW_from(xenon_pt, {
+       "SCINTILLATIONTIMECONSTANT1",
+       "SCINTILLATIONTIMECONSTANT2",
+       "SCINTILLATIONYIELD",
+       "SCINTILLATIONYIELD1",
+       "SCINTILLATIONYIELD2",
+       "RESOLUTIONSCALE",
+       "ATTACHMENT"})
+     .done();
+}
+

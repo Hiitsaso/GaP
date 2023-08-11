@@ -4,6 +4,7 @@
 #include <G4MaterialPropertiesTable.hh>
 
 G4MaterialPropertiesTable*   peek_properties();
+G4MaterialPropertiesTable*   aluminum_properties();
 G4MaterialPropertiesTable* quartz_properties();
 G4MaterialPropertiesTable*    TPB_properties();
 
