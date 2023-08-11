@@ -30,5 +30,6 @@ void place_rings_in         (G4LogicalVolume* vessel, field_cage_parameters cons
 void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters const & fcp);
 
 G4PVPlacement* geometry();
+G4PVPlacement* geometry_test();
 
 #endif

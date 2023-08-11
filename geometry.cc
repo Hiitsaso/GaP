@@ -21,6 +21,7 @@
 
 #include <G4VSolid.hh>
 #include <iostream>
+#include <typeinfo>
 
 const auto world_size = 0.5 * m;
 
@@ -82,6 +83,7 @@ G4Material* mesh_mat;
 G4Material* quartz;
 G4Material* tpb;
 G4Material* gas;
+G4Material* air;
 G4LogicalVolume* world;
 
 // Must call this at the start of any sub-geometry that you want to visualise
@@ -91,20 +93,65 @@ void ensure_initialized() {
   if (initialized) { return; }
   initialized = true;
 
-  Cu     = n4::material("G4_Cu");
-  vacuum = n4::material("G4_Galactic");
-  steel  = n4::material("G4_STAINLESS-STEEL");
-  aluminum = n4::material("G4_Al");
+  Cu     = n4::material("G4_Cu"); //No properties OK
+  vacuum = n4::material("G4_Galactic"); //No properties OK
+  steel  = n4::material("G4_STAINLESS-STEEL"); //No properties OK
+  aluminum = aluminum_with_properties();
 
   gas      = GAr_with_properties( pressure, temperature, sc_yield, elifetime);
   mesh_mat = FakeDielectric_with_properties(gas, "mesh_mat",
                                             pressure, temperature, mesh_transparency, mesh_thickn,
                                             sc_yield, elifetime, photoe_prob);
-  peek   = peek_with_properties();
+  peek   = peek_with_properties(); //No properties given OK
   quartz = quartz_with_properties();
+  //quartz = air_with_properties();
   tpb    = TPB_with_properties();
+  
   world = n4::box("world").cube(world_size).volume(vacuum);
+ 
+//~ G4MaterialPropertiesTable* table = mesh_mat -> GetMaterialPropertiesTable();
+//~ const std::string& filename = "properties.txt";
+//~ std::ofstream file;
+//~ file.open (filename, std::ios::app);
+//~ //file << "MATERIAL: " << " MESH_MAT" << "\n";
+
+//~ G4String porpertyName = "ATTACHMENT";
+
+//~ if (table) {
+	
+    //~ G4cout << "Properties of the material: " << table << "                                                      <---------------------" << G4endl;
+
+	//~ const G4MaterialPropertyVector* prop_var = nullptr;  
+	//~ auto prop_cte = 1111111.;  
+  
+    //~ prop_var = table -> GetProperty(porpertyName); 
+    //~ prop_cte = table -> GetConstProperty(porpertyName);	 
+
+    //~ if (prop_var) {
+        //~ G4cout << "Property: " ;
+        //~ G4cout << prop_var << G4endl;
+        //~ file << "Property: " << porpertyName << "\n";      
+        //~ for (size_t i = 0; i < prop_var -> GetVectorLength(); i++) {
+            //~ G4cout << (*prop_var)[i] << " ";
+            //~ file << (*prop_var)[i] << " " ; 
+		//~ }
+		//~ file << "\n"; 
+        //~ G4cout << G4endl;
+    //~ }
+    //~ else if (prop_cte) {
+		//~ G4cout << "Const property: " << prop_cte << G4endl;
+		//~ file << "Const property: " << porpertyName << "\n";    
+		//~ file << prop_cte << "\n"; 
+	//~ }
+	//~ else{
+		//~ G4cout << "This property doesn't exit" << G4endl;
+		//~ file << "This property doesn't exit: " << porpertyName << "\n";
+	//~ }
+//~ }
+//~ else{G4cout << "No properties table for this material" << "                                                      <---------------------" << G4endl;}
+//~ file.close();
 }
+
 
 G4LogicalVolume* get_world() {
   ensure_initialized();
@@ -479,3 +526,12 @@ G4PVPlacement* geometry() {
   return n4::place(world).now();
 }
 
+
+G4PVPlacement* geometry_test() {
+	G4Material* air = air_with_properties();
+	
+	G4LogicalVolume* world = n4::box("world_test").cube(10*cm).volume(air);
+	n4::tubs("tub_test_1").r(2*cm).z(2*cm).place(air).in(world).at_z(0.).check_overlaps().now();
+
+	return n4::place(world).now();
+}
