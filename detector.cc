@@ -13,11 +13,20 @@ bool process_hits(G4Step *step){
 	G4int hits_check = 0;
 	
 	G4ThreeVector position  = track -> GetVertexPosition();
+	int colWidth = 20;
 	
 	G4cout << "*************************************  :)  " << particleType << "  (:  *************************************"  << G4endl;   
 	
-	if (particleType == "opticalphoton"){ //opticalphoton (not now because it doesn't work, abs)
+	if (particleType == "opticalphoton"){ 
 	track -> SetTrackStatus(fStopAndKill);
+	
+	std::ofstream file2(filename_map_primaries, std::ios::app);
+		file2 << std::left << std::setw(colWidth) << position.x();
+		file2 << std::left << std::setw(colWidth) << position.y();
+		file2 << std::left << std::setw(colWidth) << position.z();
+		file2 << std::left << std::setw(colWidth) << hits_check;
+		file2 << std::endl;
+		file2.close();
 	
 	hits_check = 1;
 	G4cout << "*************************************  :)  OUCH  (:  *************************************"  << G4endl; 
@@ -25,7 +34,6 @@ bool process_hits(G4Step *step){
 	}
 	
 	std::ofstream file1(filename_map, std::ios::app);
-	int colWidth = 20;
 	file1 << std::left << std::setw(colWidth) << position.x();
 	file1 << std::left << std::setw(colWidth) << position.y();
 	file1 << std::left << std::setw(colWidth) << position.z();
@@ -33,15 +41,15 @@ bool process_hits(G4Step *step){
 	file1 << std::endl;
 	file1.close();
 	
-	if (track -> GetTrackID() == 1){
-		std::ofstream file2(filename_map_primaries, std::ios::app);
-		file2 << std::left << std::setw(colWidth) << position.x();
-		file2 << std::left << std::setw(colWidth) << position.y();
-		file2 << std::left << std::setw(colWidth) << position.z();
-		file2 << std::left << std::setw(colWidth) << hits_check;
-		file2 << std::endl;
-		file2.close();
-	}
+	//~ if (track -> GetTrackID() == 1){
+		//~ std::ofstream file2(filename_map_primaries, std::ios::app);
+		//~ file2 << std::left << std::setw(colWidth) << position.x();
+		//~ file2 << std::left << std::setw(colWidth) << position.y();
+		//~ file2 << std::left << std::setw(colWidth) << position.z();
+		//~ file2 << std::left << std::setw(colWidth) << hits_check;
+		//~ file2 << std::endl;
+		//~ file2.close();
+	//~ }
 	
 	return true;
 }
