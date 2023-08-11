@@ -28,6 +28,7 @@
 #include "G4OpticalPhoton.hh"
 #include "G4Electron.hh"
 #include "G4Gamma.hh"
+#include "G4Geantino.hh"
 
 G4double vessel_out_rad_    = 288./2  *mm;
 G4double vessel_out_length_ = 46.679  *cm;
@@ -148,14 +149,15 @@ void generate_ion_decay(G4Event* event, G4ThreeVector position, G4double /*time*
     generate_particles_in_event(event, position, {{ion, T}});
 }
 
-std::vector<std::tuple<G4ParticleDefinition*, G4double>> generate_partilces_and_energies_tuples(G4String particletype){
+std::vector<std::tuple<G4ParticleDefinition*, G4double>> generate_partilces_and_energies_tuples(G4String particletype, G4double particleEnergy){
 	std::vector<std::tuple<G4ParticleDefinition*, G4double>> particles_and_energies;
 	G4ParticleDefinition* particleDefinition;
 	if (particletype == "opticalphoton"){particleDefinition = G4OpticalPhoton::Definition();}
 	else if (particletype == "e-"){particleDefinition = G4Electron::Definition();}
 	else if (particletype == "gamma"){particleDefinition = G4Gamma::Definition();}
+	else if (particletype == "geantino"){particleDefinition = G4Geantino::Definition();}
 	else { throw "Unknown particle type: " + particletype; }
-	particles_and_energies.push_back(std::make_tuple(particleDefinition, 100. * keV));
+	particles_and_energies.push_back(std::make_tuple(particleDefinition, particleEnergy));
 	
     return particles_and_energies;
 }
