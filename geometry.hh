@@ -16,10 +16,13 @@ void place_pmt_holder_in(G4LogicalVolume* vessel);
 
 struct field_cage_parameters {
   G4double cathode_z;
+  G4double cathode_z_new;
   G4double cathBracket_z;
+  G4double cathBracket_z_new;
   G4double drift_length;
   G4double el_length;
   G4double drift_z;
+  G4double drift_z_new;
   G4double drift_r;
 };
 
