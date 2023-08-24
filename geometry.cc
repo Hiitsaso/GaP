@@ -18,10 +18,16 @@
 #include <G4SystemOfUnits.hh>
 #include <G4Tubs.hh>
 #include <G4UnionSolid.hh>
+#include <G4OpticalSurface.hh>
+#include <G4LogicalBorderSurface.hh>
+#include <G4UserLimits.hh>
+#include <G4UserLimits.hh>
 
 #include <G4VSolid.hh>
 #include <iostream>
 #include <typeinfo>
+
+using vec_double = std::vector<G4double>;
 
 const auto world_size = 0.5 * m;
 
@@ -59,12 +65,15 @@ const auto quartz_window_rad    = 108./2  *mm;
 const auto quartz_window_thickn = 3       *mm;
 const auto tpb_coating_thickn   = 3       *micrometer;
 
+const  auto pmt_length = 43.0  *mm;
+const  auto pmt_z      = 42.495*mm + pmt_length/2;
+
 const auto photoe_prob       =   0;
 const auto pressure          =  10 * bar;
 const auto temperature       = 293 * kelvin;
 //const auto sc_yield        =  22222./MeV; // Wsc = 45 eV, fr
 const auto sc_yield          =   1/GeV;
-//const auto sc_yield        =  1000./MeV;
+//~ const auto sc_yield        =  1000./MeV;
 const auto elifetime         = 1e6 * ms;
 // const auto drift_vel         = 1. * mm/microsecond;
 // const auto drift_transv_diff = 1. * mm/sqrt(cm);
@@ -73,6 +82,9 @@ const auto elifetime         = 1e6 * ms;
 // const auto el_vel            = 3. * mm/microsecond;
 // const auto el_transv_diff    = 1. * mm/sqrt(cm);
 // const auto el_long_diff      = .3 * mm/sqrt(cm);
+
+auto delta_drift_el = 3.225; //Fixing some error with the meassurements
+auto delta_tpb = 1.4985;
 
 G4Material* peek;
 G4Material* steel;
@@ -84,7 +96,9 @@ G4Material* quartz;
 G4Material* tpb;
 G4Material* gas;
 G4Material* air;
+G4Material* teflon;
 G4LogicalVolume* world;
+G4PVPlacement* coating_tpb_place;
 
 // Must call this at the start of any sub-geometry that you want to visualise
 // without having to construct the rest of the geometry.
@@ -95,27 +109,26 @@ void ensure_initialized() {
 
   Cu     = n4::material("G4_Cu"); //No properties OK
   vacuum = n4::material("G4_Galactic"); //No properties OK
-  steel  = n4::material("G4_STAINLESS-STEEL"); //No properties OK
+  steel  = steel_with_properties();
   aluminum = aluminum_with_properties();
 
   gas      = GAr_with_properties( pressure, temperature, sc_yield, elifetime);
   mesh_mat = FakeDielectric_with_properties(gas, "mesh_mat",
                                             pressure, temperature, mesh_transparency, mesh_thickn,
                                             sc_yield, elifetime, photoe_prob);
-  peek   = peek_with_properties(); //No properties given OK
+  peek   = peek_with_properties();
   quartz = quartz_with_properties();
-  //quartz = air_with_properties();
   tpb    = TPB_with_properties();
   
   world = n4::box("world").cube(world_size).volume(vacuum);
  
-//~ G4MaterialPropertiesTable* table = tpb -> GetMaterialPropertiesTable();
+//~ G4MaterialPropertiesTable* table = gas -> GetMaterialPropertiesTable();
 //~ const std::string& filename = "properties.txt";
 //~ std::ofstream file;
 //~ file.open (filename, std::ios::app);
-//~ //file << "MATERIAL: " << " TPB" << "\n";
+//~ //file << "MATERIAL: " << " GAr (...)" << "\n";
 
-//~ G4String porpertyName = "WLSMEANNUMBERPHOTONS";
+//~ G4String porpertyName = "RINDEX";
 
 //~ if (table) {
 	
@@ -125,7 +138,7 @@ void ensure_initialized() {
 	//~ auto prop_cte = 1111111.;  
   
     //~ prop_var = table -> GetProperty(porpertyName); 
-    //~ prop_cte = table -> GetConstProperty(porpertyName);	 
+    //~ //prop_cte = table -> GetConstProperty(porpertyName);	 
 
     //~ if (prop_var) {
         //~ G4cout << "Property: " ;
@@ -150,6 +163,7 @@ void ensure_initialized() {
 //~ }
 //~ else{G4cout << "No properties table for this material" << "                                                      <---------------------" << G4endl;}
 //~ file.close();
+
 }
 
 
@@ -219,9 +233,23 @@ void place_quartz_window_holder_in(G4LogicalVolume* vessel) {
   /////////////////////////
   //Quartz Window and Evaporated TPB
   auto quartz_window_z = 35.495*mm + quartz_window_thickn/2;
-  auto tpb_coating_z = quartz_window_z - quartz_window_thickn/2 - tpb_coating_thickn/2;
-  //n4::tubs("QuartzWindow").r(quartz_window_rad).z(quartz_window_thickn).place(quartz).in(vessel).at_z(-quartz_window_z).check_overlaps().now();
-  //n4::tubs("CoatingTPB"  ).r(quartz_window_rad).z(  tpb_coating_thickn).place(tpb   ).in(vessel).at_z(  -tpb_coating_z).check_overlaps().now();
+  G4cout << "HEREEEEEEEEEEEEEEEEE" << "-quartz_window_z" << -quartz_window_z << G4endl;
+  auto tpb_coating_z = quartz_window_z - quartz_window_thickn/2 - tpb_coating_thickn/2 - 3*micrometer; //actually coating the quartz xd
+  //auto tpb_coating_z = quartz_window_z - quartz_window_thickn/2 - tpb_coating_thickn/2 - delta_tpb;
+  G4cout << "HEREEEEEEEEEEEEEEEEE" << "-tpb_coating_z" << -tpb_coating_z << G4endl;
+  n4::tubs("QuartzWindow").r(quartz_window_rad).z(quartz_window_thickn).place(quartz).in(vessel).at_z(-quartz_window_z).check_overlaps().now();
+  
+  G4LogicalVolume* coating_tpb_logic = n4::tubs("CoatingTPB").r(quartz_window_rad).z(tpb_coating_thickn).volume(tpb);
+  G4double maxStep = 0.1 * micrometer;  
+  G4UserLimits* userLimits = new G4UserLimits(maxStep);
+  coating_tpb_logic->SetUserLimits(userLimits);  
+
+  coating_tpb_place = n4::place(coating_tpb_logic).in(vessel).at_z(-tpb_coating_z).check_overlaps().now();
+  //~ G4Tubs* solid_tpb = n4::tubs("SolidTPB").r(quartz_window_rad).z(  tpb_coating_thickn).solid(); 
+  //~ G4LogicalVolume* logic_tpb = new G4LogicalVolume(solid_tpb, tpb, "CoatingTPB");
+  //~ auto sensitive_detector = new n4::sensitive_detector("DetectorTPB", process_hits);
+  //~ logic_tpb -> SetSensitiveDetector(sensitive_detector);
+  //~ n4::place(logic_tpb).in(vessel).at_z(-tpb_coating_z).check_overlaps().now();
 
   // Peek Quartz Window Holder
 
@@ -274,20 +302,24 @@ void place_quartz_window_holder_in(G4LogicalVolume* vessel) {
   }
 };
 
-void place_pmt_holder_in(G4LogicalVolume* vessel) {
-  //Build PMT
-  //auto pmt_length = pmt_.Length();
-  auto pmt_length = 43.0  *mm;
-  auto pmt_z      = 42.495*mm + pmt_length/2;
+void place_pmt_holder_in(G4LogicalVolume* vessel) {  
+  //Build OnePMT  
+  //~ auto n = 0;
+  //~ auto test_rad = vessel_rad - n*4.5*mm;
+  //~ auto one_pmt_length = 1*cm;
+  //~ auto one_pmt_z = -pmt_z + pmt_length/2 - one_pmt_length/2;
+  //~ G4Tubs* solid_one_pmt = n4::tubs("SolidOnePMT").r(test_rad).z(one_pmt_length).solid(); //plate_pmt_rad
+  //~ G4LogicalVolume* logic_one_pmt = new G4LogicalVolume(solid_one_pmt, aluminum, "OnePMT");
+  //~ auto sensitive_detector = new n4::sensitive_detector("DeterctorOnePMT", process_hits);
+  //~ logic_one_pmt -> SetSensitiveDetector(sensitive_detector);
+  //~ n4::place(logic_one_pmt).in(vessel).at_z(one_pmt_z).check_overlaps().now();
 
+  //Build PMT
   G4Tubs* solid_pmt = n4::tubs("SolidPMT").r(pmt_rad).z(pmt_length).solid(); // Hamamatsu pmt length: 43*mm | STEP pmt gap length: 57.5*mm
   G4LogicalVolume* logic_pmt = new G4LogicalVolume(solid_pmt, aluminum, "PMT");
+  //~ auto sensitive_detector = new n4::sensitive_detector("DetectorPMT", process_hits);
+  //~ logic_pmt -> SetSensitiveDetector(sensitive_detector);
   
-  //auto end_of_event = [](G4HCofThisEvent *what){
-  //};
-  
-  auto sensitive_detector = new n4::sensitive_detector("DetectorPMT", process_hits);
-  logic_pmt -> SetSensitiveDetector(sensitive_detector);
   // Position pairs (x,Y) for PMTs
   std::vector <float> pmt_PsX={-15.573,  20.68 , -36.253, 0, 36.253, -20.68 , 15.573};
   std::vector <float> pmt_PsY={-32.871, -29.922,  -2.949, 0,  2.949,  29.922, 32.871};
@@ -312,7 +344,8 @@ void place_pmt_holder_in(G4LogicalVolume* vessel) {
   G4ThreeVector pos_enclosure_pmt    = {0, 0, 0};
   G4ThreeVector pos_enclosurevac_pmt = {0, 0, 0};
   G4ThreeVector pos                  = {0, 0, 0};
-
+  
+   G4cout << "HEREEEEEEEEEEEEEEEEE" << "-pmt_z" << -pmt_z << G4endl;
   for (G4int i = 0; i < G4int(pmt_PsX.size()); i++) {
     pos_pmt              = G4ThreeVector(pmt_PsX[i]*mm, pmt_PsY[i]*mm,            -pmt_z);
     pos_enclosure_pmt    = G4ThreeVector(pmt_PsX[i]*mm, pmt_PsY[i]*mm,    relative_pmt_z);
@@ -356,8 +389,8 @@ field_cage_parameters model_something_old() {
   field_cage_parameters fcp;
    
   //Cathode 
-  fcp.cathode_z = 4.505*mm + mesh_thickn/2;  //cathode center from vessel center
-  fcp.cathode_z_new = 4.505*mm + mesh_thickn/2 + meshBracket_thickn*3/2;  //cathode center from vessel center
+  fcp.cathode_z = 4.505*mm + mesh_thickn/2 - delta_drift_el;  //cathode center from vessel center
+  fcp.cathode_z_new = 4.505*mm + mesh_thickn/2 + meshBracket_thickn*3/2 - delta_drift_el;  //cathode center from vessel center
 	//auto cathode_z = 4.505*mm + mesh_thickn/2 + 2*D + 5*d + 6*ring_thickn;  //cathode center from vessel center
 
   // Cathode Bracket
@@ -373,6 +406,8 @@ field_cage_parameters model_something_old() {
   fcp.drift_z = fcp.cathode_z - mesh_thickn/2 - fcp.drift_length/2;  
   fcp.drift_z_new = fcp.cathode_z - mesh_thickn/2 - fcp.drift_length/2 + meshBracket_thickn;  
   fcp.drift_r = meshBracket_rad;
+  
+  fcp.el_z = fcp.drift_z - fcp.drift_length/2 - fcp.el_length/2;
 
   return fcp;
 }
@@ -395,6 +430,8 @@ field_cage_parameters model_something_new() {
   // Drift
   fcp.drift_z = fcp.cathode_z - mesh_thickn/2 - fcp.drift_length/2;
   fcp.drift_r = anodeBracket_rad;
+  
+  fcp.el_z = fcp.drift_z - fcp.drift_length/2 - fcp.el_length/2;
 
   return fcp;
 }
@@ -430,20 +467,34 @@ void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters cons
   n4::place(gas_el).in(vessel).at_z(el_z).check_overlaps().now(); 
 
   // Gate
-  auto gate_z = fcp.el_length/2 - mesh_thickn/2 + meshBracket_thickn/2;
-  n4::tubs("gate").r(mesh_rad).z(mesh_thickn).place(mesh_mat).in(gas_el).at_z(gate_z).check_overlaps().now();
+  //auto gate_z = fcp.el_length/2 - mesh_thickn/2 + meshBracket_thickn/2;
+  auto gate_z = fcp.drift_z_new - fcp.drift_length/2 - meshBracket_thickn/2;
+  n4::tubs("gate").r(mesh_rad).z(mesh_thickn).place(mesh_mat).in(vessel).at_z(gate_z).check_overlaps().now();
 
   // Gate Bracket
   auto gateBracket_z = gate_z; //CENTER??? 
-  n4::tubs("gateBracket").r_inner(mesh_rad).r(meshBracket_rad).z(meshBracket_thickn).place(steel).in(gas_el).at_z(gateBracket_z).check_overlaps().now();
+  n4::tubs("gateBracket").r_inner(mesh_rad).r(meshBracket_rad).z(meshBracket_thickn).place(steel).in(vessel).at_z(gateBracket_z).check_overlaps().now();
 
   //Anode
-  auto anode_z = - fcp.el_length/2 + mesh_thickn/2 - anodeBracket_thickn/2;
-  n4::tubs("Anode").r(mesh_rad).z(mesh_thickn).place(mesh_mat).in(gas_el).at_z(anode_z).check_overlaps().now();
-
+  //auto anode_z = - fcp.el_length/2 + mesh_thickn/2 - anodeBracket_thickn/2;
+  auto anode_z = gate_z - meshBracket_thickn/2 - fcp.el_length - anodeBracket_thickn/2;
+  n4::tubs("Anode").r(mesh_rad).z(mesh_thickn).place(mesh_mat).in(vessel).at_z(anode_z).check_overlaps().now();
+  G4cout << "HEREEEEEEEEEEEEEEEEE" << "anode_z" << anode_z << G4endl;
   //Anode Bracket //CENTER??? 
   auto anodeBracket_z = anode_z ;
-  n4::tubs("AnodeBracket").r_inner(mesh_rad).r(anodeBracket_rad).z(anodeBracket_thickn).place(steel).in(gas_el).at_z(anodeBracket_z).check_overlaps().now();
+  n4::tubs("AnodeBracket").r_inner(mesh_rad).r(anodeBracket_rad).z(anodeBracket_thickn).place(steel).in(vessel).at_z(anodeBracket_z).check_overlaps().now();
+  
+  //~ G4Tubs* solid_anode_detector = n4::tubs("SolidAnodeDetector").r(vessel_rad).z(anodeBracket_thickn).solid(); 
+  //~ G4LogicalVolume* logic_anode_detector = new G4LogicalVolume(solid_anode_detector, steel, "AnodeDetector");
+  //~ auto sensitive_detector_anode = new n4::sensitive_detector("AnodeDetector", process_hits_anode);
+  //~ logic_anode_detector -> SetSensitiveDetector(sensitive_detector_anode);
+  //~ n4::place(logic_anode_detector).in(vessel).at_z(anodeBracket_z).check_overlaps().now();
+  
+  //~ G4Tubs* solid_gate_detector = n4::tubs("SolidGateDetector").r(vessel_rad).z(meshBracket_thickn).solid();
+  //~ G4LogicalVolume* logic_gate_detector = new G4LogicalVolume(solid_gate_detector, steel, "GateDetector");
+  //~ auto sensitive_detector_gate = new n4::sensitive_detector("GateDetector", process_hits_gate);
+  //~ logic_gate_detector -> SetSensitiveDetector(sensitive_detector_gate);
+  //~ n4::place(logic_gate_detector).in(vessel).at_z(gateBracket_z).check_overlaps().now();
 
   // Peek Anode Holder
   auto anodeHolder_length  =  30       *mm;
@@ -467,6 +518,51 @@ void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters cons
   }
 }
 
+void place_optical_surface_between(G4PVPlacement* one, G4PVPlacement* two, G4String name, G4double refelctivity){
+    static G4OpticalSurface* optical_surface = nullptr;
+    if (! optical_surface) {
+        optical_surface = new G4OpticalSurface(name);
+        // Values from same paper as above ("Optimization of Parameters...")
+        // "groundfrontpainted" (I think) only considers whether the photon is reflected or absorbed, so there will be no shine through visible in the simulation
+        optical_surface -> SetType(dielectric_dielectric);
+        optical_surface -> SetModel(unified);
+        optical_surface -> SetFinish(groundfrontpainted);
+        optical_surface -> SetSigmaAlpha(0.0);
+
+        vec_double pp = {2.*eV, 12.*eV};
+        // According to the docs, for UNIFIED, dielectric_dielectric surfaces only the Lambertian reflection is turned on
+        optical_surface -> SetMaterialPropertiesTable(
+            n4::material_properties{}
+            .add("REFLECTIVITY", pp, {refelctivity , refelctivity})
+            .done());
+    }
+    new G4LogicalBorderSurface(name, one, two, optical_surface);
+}
+
+G4PVPlacement* place_teflon_surface(G4LogicalVolume* vessel){
+  auto teflon_length  = pmt_z - pmt_length/2 + vessel_length/2; 
+  auto teflon_z = vessel_length/2 - teflon_length/2;
+  teflon              = teflon_with_properties();
+  auto teflon_r_inner = meshBracket_rad + 1.*mm;
+  auto teflon_r       = teflon_r_inner  + 0.25*mm;
+  auto teflon_thickn = teflon_r - teflon_r_inner;
+  auto teflon_z_L = teflon_z - teflon_length + teflon_thickn/2;
+  auto teflon_z_R = teflon_z + teflon_length - teflon_thickn/2;
+  
+  auto teflon_surface_lids = n4::tubs("TeflonSurfaceLids").r_inner(teflon_r_inner).r(teflon_r).z(teflon_length);
+  auto teflon_surface_lidL = n4::tubs("TeflonSurfaceLidL").r(teflon_r).z(teflon_thickn);//.place(teflon).in(vessel).at_z(teflon_z_L).check_overlaps().now();
+  auto teflon_surface_lidR = n4::tubs("TeflonSurfaceLidR").r(teflon_r).z(teflon_thickn);//.place(teflon).in(vessel).at_z(teflon_z_R).check_overlaps().now();
+  
+    auto teflon_surface  =
+    /*      */teflon_surface_lids 
+    //~ .subtract(teflon_surface_lidL).at_z(teflon_z_L)
+    //~ .subtract(teflon_surface_lidR).at_z(teflon_z_R)
+    .name("TeflonSurface")
+    .place(teflon).in(vessel).at_z(teflon_z).check_overlaps().now();
+  
+  return teflon_surface;
+}
+
 G4PVPlacement* geometry() {
   ensure_initialized();
 
@@ -479,8 +575,11 @@ G4PVPlacement* geometry() {
   //Build inside detector
   //BuildTPC(gas, mesh_mat, steel, peek, vacuum, quartz, tpb, vessel_steel);
 
-  auto vessel = n4::tubs("GasVessel").r(vessel_rad).z(vessel_length).volume(gas);
-  n4::place(vessel).in(vessel_steel).check_overlaps().now();
+  auto vessel       = n4::tubs("GasVessel").r(vessel_rad).z(vessel_length).volume(gas);
+  G4double maxStep_ves = 0.1 * micrometer;  
+  G4UserLimits* userLimits_ves = new G4UserLimits(maxStep_ves);
+  vessel->SetUserLimits(userLimits_ves);  
+  auto vessel_place = n4::place(vessel).in(vessel_steel).check_overlaps().now();
 
   field_cage_parameters fcp = (use_new_model) ? model_something_new() : model_something_old();
   G4cout << "Debug message" << G4endl;
@@ -501,7 +600,13 @@ G4PVPlacement* geometry() {
 
   place_anode_el_gate_in(vessel, fcp);
   place_quartz_window_holder_in(vessel);
-
+  
+  //~ auto teflon_surface = place_teflon_surface(vessel);
+  //~ place_optical_surface_between(teflon_surface, vessel_place, "VesselTeflonSurface1", 0.5);
+  //~ place_optical_surface_between(vessel_place, teflon_surface, "VesselTeflonSurface2", 0.5);
+  
+  //~ place_optical_surface_between(coating_tpb_place, vessel_place, "VesselTPBSurface", 0.98);
+  
   place_pmt_holder_in(vessel);
   if (use_new_model == 1) {
 
