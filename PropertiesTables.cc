@@ -30,12 +30,23 @@ const G4double noAbsLength_   = 1.e8  * m;
 const vecd     optPhotRangeE_ = {optPhotMinE_, optPhotMaxE_};
 
 //////////////////////////////////////////////////////////////////////// OK
-G4MaterialPropertiesTable* peek_properties(){ return n4::material_properties().done(); }
+G4MaterialPropertiesTable* peek_properties(){ 
+	return n4::material_properties()
+		.done(); 
+}
 
 //////////////////////////////////////////////////////////////////////// OK
 G4MaterialPropertiesTable* aluminum_properties(){ 
 	return n4::material_properties()
-		.add("RINDEX",  {9.686*eV}, {0.12397})
+		//~ .add("REALRINDEX",  {9.686*eV, 2.954*eV}, {0.049467, 0.54105})
+		//~ .add("IMAGINARYRINDEX",  {9.686*eV, 2.954*eV}, {1.2201, 5.0843})
+		//~ .add("RINDEX", {9.686*eV, 2.954*eV}, {1., 1.})
+		.done(); 
+}
+
+//////////////////////////////////////////////////////////////////////// OK
+G4MaterialPropertiesTable* steel_properties(){ 
+	return n4::material_properties()
 		.done(); 
 }
 
@@ -170,9 +181,9 @@ G4MaterialPropertiesTable* quartz_properties(){
     5e-5
     });
   
-  for (size_t i = 0; i < abs_energy.size(); i++) {
-			G4cout << abs_energy[i] * 1000000 << " //// " << absLength[i] <<"         <--------------------------------------------------" << G4endl;          
-  }
+  //~ for (size_t i = 0; i < abs_energy.size(); i++) {
+			//~ G4cout << abs_energy[i] * 1000000 << " //// " << absLength[i] <<"         <--------------------------------------------------" << G4endl;          
+  //~ }
 
   return n4::material_properties()
     .add("RINDEX"   ,  ri_energy, rIndex)
@@ -183,7 +194,6 @@ G4MaterialPropertiesTable* quartz_properties(){
 }
 
 ////////////////////////////////////////////////////////////////////////
-
 
 G4MaterialPropertiesTable* TPB_properties() {
   // WLS ABSORPTION LENGTH (Version NoSecWLS)
@@ -232,13 +242,14 @@ G4MaterialPropertiesTable* TPB_properties() {
     .add("RINDEX"               , optPhotRangeE_, 1.67)
     // Assuming no absorption except WLS
     .add("ABSLENGTH"            , optPhotRangeE_, noAbsLength_) // Wrong argument replaced (see previous line)
-    .add("WLSABSLENGTH"         , WLS_abs_energy, WLS_absLength)
-    .add("WLSCOMPONENT"         , WLS_emi_energy, WLS_emiSpectrum)
-    .add("WLSTIMECONSTANT"      , 1.2 * ns) // WLS Delay
-    .add("WLSMEANNUMBERPHOTONS" , 0.65) // WLS Quantum Efficiency
+    //~ .add("WLSABSLENGTH"         , WLS_abs_energy, WLS_absLength)
+    //~ .add("WLSCOMPONENT"         , WLS_emi_energy, WLS_emiSpectrum)
+    //~ .add("WLSTIMECONSTANT"      , 1.2 * ns) // WLS Delay
+    //~ .add("WLSMEANNUMBERPHOTONS" , 0.65) // WLS Quantum Efficiency
     // According to the paper, the QE of TPB depends on the incident wavelength.
     // As Geant4 doesn't allow this possibility, it is set to the value corresponding
     // to Xe scintillation spectrum peak.
+    //~ .NEW("WLSCONVEFFICIENCY", 1. ) //Not in the original code
     .done();
 }
 ////////////////////////////////////////////////////////////////////////

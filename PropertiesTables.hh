@@ -5,6 +5,7 @@
 
 G4MaterialPropertiesTable*   peek_properties();
 G4MaterialPropertiesTable*   aluminum_properties();
+G4MaterialPropertiesTable*   steel_properties();
 G4MaterialPropertiesTable* quartz_properties();
 G4MaterialPropertiesTable*    TPB_properties();
 
