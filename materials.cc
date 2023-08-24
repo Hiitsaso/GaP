@@ -38,6 +38,14 @@ G4Material* aluminum_with_properties() {
 
 //////////////////////////////////////////////////////////////////////// OK
 
+G4Material* steel_with_properties() {
+  auto steel = n4::material("G4_STAINLESS-STEEL");
+  steel -> SetMaterialPropertiesTable(steel_properties()) ;
+  return steel;
+}
+
+//////////////////////////////////////////////////////////////////////// OK
+
 G4Material* quartz_with_properties() {
   auto quartz = n4::material("G4_SILICON_DIOXIDE");  
   quartz -> SetMaterialPropertiesTable(quartz_properties());
@@ -133,4 +141,21 @@ G4Material* air_with_properties() {
     air -> SetMaterialPropertiesTable(mpt_air);
     return air;
 }
+
+////////////////////////////////////////////////////////////////////////
+
+G4Material* teflon_with_properties(){
+	auto teflon = n4::material("G4_TEFLON");
+	// Values could be taken from "Optical properties of Teflon AF amorphous fluoropolymers" by Yang, French & Tokarsky (using AF2400, Fig.6)
+    // but are also stated in the same paper as above
+    const vec_double OPTPHOT_ENERGY_RANGE{1*eV, 10*eV};
+    const G4double noAbsLength_   = 1.e8  * m;
+    G4MaterialPropertiesTable *mpt_teflon = n4::material_properties()
+        .add("RINDEX", OPTPHOT_ENERGY_RANGE, {1.35, 1.35})
+        .add("ABSLENGTH", OPTPHOT_ENERGY_RANGE, noAbsLength_)
+        .done();
+    teflon -> SetMaterialPropertiesTable(mpt_teflon);
+    return teflon;
+}
+
 

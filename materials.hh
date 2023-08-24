@@ -8,6 +8,7 @@
 
 G4Material* peek_with_properties();
 G4Material* aluminum_with_properties();
+G4Material* steel_with_properties();
 G4Material* quartz_with_properties();
 G4Material* TPB_with_properties();
 G4Material* CopyMaterial(G4Material* original, const G4String& newname);
@@ -23,5 +24,6 @@ G4Material* GAr_with_properties(G4double pressure, G4double temperature, G4doubl
 //G4Material* GKr_with_properties(G4double pressure, G4double temperature, G4double sc_yield, G4double e_lifetime);                       
 
 G4Material* air_with_properties();
+G4Material* teflon_with_properties();
 
 #endif
