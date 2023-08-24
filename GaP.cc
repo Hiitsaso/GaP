@@ -7,6 +7,8 @@
 #include "geometry.hh"
 #include "ParticleGenerator.hh"
 #include "kr83.hh"
+//~ #include "Physics.hh"
+//~ #include "WLS.hh"
 
 #include <CLHEP/Units/PhysicalConstants.h>
 #include <FTFP_BERT.hh>
@@ -35,6 +37,8 @@
 #include <G4VisExecutive.hh>
 #include <G4VisManager.hh>
 #include <G4GenericMessenger.hh>
+#include <G4ProcessManager.hh>
+#include "G4OpticalPhoton.hh"
 
 #include <chrono>
 #include <cmath>
@@ -45,7 +49,7 @@
 #include <vector>
 #include <tuple>
 
-auto get_pre_volume_name(G4Step const * const step) {
+auto get_pre_volume_name(G4Step const* const step) {
     return step -> GetPreStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName();
 };
 
@@ -59,11 +63,11 @@ int main(int argc, char *argv[]) {
     G4int  eventCounter;
     std::vector<int> trackIDVector;
     
-    const std::string& filename_event = "nan.txt";
-    const std::string& filename_step = "EnergyDepositTotal_Kr83m_10bar_sum_withoutTransportation.txt";
+    const std::string& filename_event = "files_DepositedEnergy/EnergyDepositTotal_Co57_10bar_sum_fromVessel.txt";
+    const std::string& filename_step = "files_DepositedEnergy/EnergyDepositTotal_Co57_10bar_step_fromVessel.txt";
     
-    const std::string& filename_event_1 = "EnergyDepositTotal_Kr83m_10bar_sum_withoutTransportation.txt";
-    const std::string& filename_event_2 = "EnergyDepositTotal_Kr83m_10bar_sum_justCompton.txt";
+    const std::string& filename_event_1 = "nan.txt";
+    const std::string& filename_event_2 = "nan.txt";
     
 ////////////////////////////////////////////////////////////////////////
 //tracking actions
@@ -98,7 +102,6 @@ int main(int argc, char *argv[]) {
             G4String particleType = track->GetDefinition()->GetParticleName();
             G4ThreeVector position = step->GetPostStepPoint()->GetPosition();
             G4double time = step->GetPostStepPoint()->GetGlobalTime();
-            time = time * ns;
 
             G4double stepLenght = step->GetStepLength();
             auto velocity = step->GetPreStepPoint()->GetVelocity();
@@ -107,7 +110,6 @@ int main(int argc, char *argv[]) {
             G4String interactionType = process->GetProcessName();
 
             if (energy_deposit_step != 0.0 && interactionType!= "Transportation") {
-                if (energy_deposit_step != 0.0) {
                     energy_deposit_total += energy_deposit_step;
                     counts++;
 
@@ -129,8 +131,6 @@ int main(int argc, char *argv[]) {
                     file << std::left << std::setw(colWidth) << interactionType;
                     file << std::endl;
                     file.close();
-                }
-
             }
         }
     };
@@ -210,6 +210,19 @@ int main(int argc, char *argv[]) {
             }
         }
     };
+    
+    auto check_quartz = [](G4Step const* step){
+		G4Track* track = step -> GetTrack();
+		G4String particleType = track->GetDefinition()->GetParticleName();
+		G4double photonEnergy_pre = step -> GetPostStepPoint() -> GetTotalEnergy(); 
+		G4double photonEnergy = step -> GetPostStepPoint() -> GetTotalEnergy(); 
+		G4double wavelength_pre =  (CLHEP::h_Planck * CLHEP::c_light) / photonEnergy_pre; 
+		G4double wavelength =  (CLHEP::h_Planck * CLHEP::c_light) / photonEnergy; 
+		if (step -> GetPostStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName() == "QuartzWindow" && step -> GetPreStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName() == "CoatingTPB"){
+		const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
+		G4cout << "*************************************  :)  " << wavelength_pre << " ----> " << wavelength << " | " << photonEnergy_pre << " ----> " << photonEnergy << "  (:  *************************************"  << G4endl;   
+		}
+	};
 
 
 
@@ -221,7 +234,7 @@ int main(int argc, char *argv[]) {
             std::ofstream file;
             file.open (filename_event, std::ios::app);
             // file << energy_deposit_total << "\n";
-            file << energy_deposit_total * 1000. << "\n";
+            file << energy_deposit_total * 1000 << "\n";
             file.close();
 			
             //G4cout << "*************************************  :)  " << energy_deposit_total << "  (:  *************************************      <---------"  << G4endl;
@@ -251,7 +264,7 @@ int main(int argc, char *argv[]) {
         }
 
         eventCounter++;
-        if (eventCounter % 10000 == 0) {
+        if (eventCounter % 1000 == 0) {
             G4cout << "*************************************  :)  " << eventCounter << "  (:  *************************************"  << G4endl;
         }
     };
@@ -323,25 +336,31 @@ int main(int argc, char *argv[]) {
     
     
     auto delete_file_map_and_reset_eventCounter = [& eventCounter](G4Run const* run){
-		const std::string& filename_map = "Detector_map_test.txt";
-		const std::string& filename_map_primaries = "Detector_map_test_primaries.txt";
-		
-		std::ofstream file1(filename_map, std::ios::out);
+		const std::string& filename_1 = "nan.txt";
+		//~ const std::string& filename_2 = "Test_gate_vessel_1.txt";
 		int colWidth = 20;
-		file1 << std::left << std::setw(colWidth) << "X";
-		file1 << std::left << std::setw(colWidth) << "Y";
-		file1 << std::left << std::setw(colWidth) << "Z";
-		file1 << std::left << std::setw(colWidth) << "Hits check";
+		
+		std::ofstream file1(filename_1, std::ios::out);
+		file1 << std::left << std::setw(colWidth) << "X_from";
+		file1 << std::left << std::setw(colWidth) << "Y_from";
+		file1 << std::left << std::setw(colWidth) << "Z_from";
+		file1 << std::left << std::setw(colWidth) << "X_to";
+		file1 << std::left << std::setw(colWidth) << "Y_to";
+		file1 << std::left << std::setw(colWidth) << "Z_to";
+		file1 << std::left << std::setw(colWidth) << "Hits";
 		file1 << std::endl;
 		file1.close();
 		
-		std::ofstream file2(filename_map_primaries, std::ios::out);
-		file2 << std::left << std::setw(colWidth) << "X";
-		file2 << std::left << std::setw(colWidth) << "Y";
-		file2 << std::left << std::setw(colWidth) << "Z";
-		file2 << std::left << std::setw(colWidth) << "Hits check primaries";
-		file2 << std::endl;
-		file2.close();
+		//~ std::ofstream file2(filename_2, std::ios::out);
+		//~ file2 << std::left << std::setw(colWidth) << "X_from";
+		//~ file2 << std::left << std::setw(colWidth) << "Y_from";
+		//~ file2 << std::left << std::setw(colWidth) << "Z_from";
+		//~ file2 << std::left << std::setw(colWidth) << "X_to";
+		//~ file2 << std::left << std::setw(colWidth) << "Y_to";
+		//~ file2 << std::left << std::setw(colWidth) << "Z_to";
+		//~ file2 << std::left << std::setw(colWidth) << "Hits";
+		//~ file2 << std::endl;
+		//~ file2.close();
     
 		eventCounter = 0;
 		
@@ -355,15 +374,17 @@ int main(int argc, char *argv[]) {
     auto physics_list = new FTFP_BERT{verbosity};
     physics_list ->  ReplacePhysics(new G4EmStandardPhysics_option4());
     physics_list -> RegisterPhysics(new G4OpticalPhysics{});
-    //physics_list -> RegisterPhysics(new G4RadioactiveDecayPhysics);
-    //physics_list -> RegisterPhysics(new G4DecayPhysics());
+    physics_list -> RegisterPhysics(new G4RadioactiveDecayPhysics);
+    physics_list -> RegisterPhysics(new G4DecayPhysics());
 
 	auto generic_messenger = new G4GenericMessenger(nullptr,"/beam/", "Particle beam generator");
-	G4double fixed_z = 0.*mm;
+	field_cage_parameters fcp = model_something_old();
+	G4double fixed_z = 0.;
 	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
 	G4String particleDefinition = "opticalphoton";
 	generic_messenger -> DeclareProperty("particleDefinition", particleDefinition,"Type of the generated particle");
-	G4double particleEnergy = 9.686*eV;
+	G4double particleEnergy = 9.693*eV; //(128nm) 
+	//~ G4double particleEnergy = 2.954*eV;  //(420nm)
 	generic_messenger -> DeclareProperty("particleEnergy", particleEnergy,"Energy of the generated particle");
 	
 	
@@ -374,22 +395,23 @@ int main(int argc, char *argv[]) {
     run_manager -> SetUserInitialization(physics_list);
     
     //G4ParticleTable needs to be call after G4VUserPhysicsList is instantiated and assigned to G4RunManager
-    auto opticalphoton_test = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, {0., 0., fixed_z}, generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
-		//auto opticalphoton = [&fixed_z, &particleDefinition, particleEnergy](auto event){generate_particles_in_event(event, random_generator_inside_drift(fixed_z), generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
+		//auto opticalphoton = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, random_generator_inside_el({}), generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
+		//auto opticalphoton_test = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, {0., 0., fixed_z}, generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
 		//auto box_source = [](auto event){generate_particles_in_event(event, {0., 0., 167.6775*mm + 50.*mm}, generate_partilces_and_energies_tuples());};  //From the box_source
 		//auto kr83m = [](auto event){generate_ion_decay(event, random_generator_inside_drift({}), 0);}; 
 		//auto kr83m_nexus= [](auto event){ kr83_generator(event, 32.1473*keV, 9.396*keV,  0.0490, 154.*ns); }; 
-		//auto Co57 = [vessel_out_rad_, angle, source_pos_z](auto event){generate_ion_decay(event, {vessel_out_rad_*cos(angle), vessel_out_rad_*sin(angle), source_pos_z}, 0);};  //From the surface
-		//auto Am241 = [cathode_z](auto event){generate_ion_decay(event, {0., 0., cathode_z}, 0);};  //From the surface of the cathode
+	auto vessel_out_rad_ = 288./2  *mm;
+	auto ion = [vessel_out_rad_](auto event){generate_ion_decay(event, {vessel_out_rad_*cos(0.), vessel_out_rad_*sin(0.), 0.}, 0);};  //From the surface
+	//~ auto ion = [fcp](auto event){generate_ion_decay(event, {0., 0., fcp.cathode_z_new - 2*0.075*mm}, 0);};  //From the surface of the cathode
 
     
-    run_manager -> SetUserInitialization((new n4::actions{opticalphoton_test})
+    run_manager -> SetUserInitialization((new n4::actions{ion})
                                                 -> set(new n4::stepping_action{write_info_and_get_energy_step})
                                                 //-> set((new n4::tracking_action) -> post(create_trackIDVector) -> pre(delete_track)
-                                                -> set((new n4::event_action) -> end(write_energy_event_double) -> begin(reset_energy))
-                                                -> set((new n4::run_action) -> begin(delete_file_map_and_reset_eventCounter)));
+                                                -> set((new n4::event_action) -> end(write_energy_event) -> begin(reset_energy))
+                                                -> set((new n4::run_action) -> begin(delete_file_long)));
                                                 
-    run_manager -> SetUserInitialization(new n4::geometry{geometry});  
+    run_manager -> SetUserInitialization(new n4::geometry{geometry}); 
 
     // auto world = get_world();
     // //auto& place_something_in = place_mesh_holder_in;
@@ -400,6 +422,10 @@ int main(int argc, char *argv[]) {
     // run_manager -> SetUserInitialization(new n4::geometry{[&] { place_something_in(world); return n4::place(world).now(); }});
 
     run_manager -> Initialize();
-
+   
+    //~ G4ProcessManager* process_manager =  G4OpticalPhoton::Definition() -> GetProcessManager();
+    //~ auto wls_process = new WLS();
+    //~ process_manager -> AddProcess(wls_process);
+    
     n4::ui(argc, argv);
 }
