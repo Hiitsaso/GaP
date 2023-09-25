@@ -2,7 +2,7 @@
 
 #include "nain4.hh"
 #include "g4-mandatory.hh"
-#include "geometry.hh"
+#include "GeometryV1.hh"
 #include "n4-volumes.hh"
 #include "n4-utils.hh"
 
@@ -578,7 +578,7 @@ void place_encapsulation(G4LogicalVolume* vessel, field_cage_parameters const & 
 	n4::tubs("RadioactiveSourceEncapsulation").r(encapsulation_rad).z(encapsulation_lenght).place(plastic).in(vessel).at_z(encapsulation_z).check_overlaps().now();
 }
 
-G4PVPlacement* geometry() {
+G4PVPlacement* GeometryV1() {
   ensure_initialized();
 
   auto use_new_model = false;
@@ -654,7 +654,7 @@ G4PVPlacement* geometry() {
 }
 
 
-G4PVPlacement* geometry_test() {
+G4PVPlacement* GeometryV1_test() {
 	tpb    = TPB_with_properties();
 	quartz = quartz_with_properties();
 	

@@ -9,7 +9,7 @@
 #include "G4RadioactiveDecayPhysics.hh"
 
 #include "kr83.hh"
-#include "geometry.hh"
+#include "GeometryV1.hh"
 #include "PositionGenerator.hh"
 
 

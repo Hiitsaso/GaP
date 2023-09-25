@@ -4,7 +4,7 @@
 #include "n4-utils.hh"
 #include "n4-volumes.hh"
 
-#include "geometry.hh"
+#include "GeometryV1.hh"
 #include "ParticleGenerator.hh"
 #include "kr83.hh"
 #include "PositionGenerator.hh"
@@ -419,7 +419,7 @@ const std::string filename_event_2 = "nan.txt";
                                                 -> set((new n4::event_action) -> end(event_counter) -> begin(reset_energy))
                                                 -> set((new n4::run_action) -> begin(delete_file_map_and_reset_eventCounter)));
                                                 
-    run_manager -> SetUserInitialization(new n4::geometry{geometry}); 
+    run_manager -> SetUserInitialization(new n4::geometry{GeometryV1}); 
 
     // auto world = get_world();
     // //auto& place_something_in = place_mesh_holder_in;

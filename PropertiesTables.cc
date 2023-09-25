@@ -364,7 +364,7 @@ G4MaterialPropertiesTable* teflon_properties(){
 
 //////////////////////////////////////////////////////////////////////// 
 G4MaterialPropertiesTable* air_properties(){ 
-	// TODO: remove duplication of hc (defined in both materials.cc and geometry.cc)
+	// TODO: remove duplication of hc (defined in both materials.cc and GeometryV1.cc)
 	const G4double hc = CLHEP::h_Planck * CLHEP::c_light;
 	const vecd OPTPHOT_ENERGY_RANGE{1*eV, 8.21*eV};
 	return n4::material_properties()

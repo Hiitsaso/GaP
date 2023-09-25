@@ -1,5 +1,5 @@
-#ifndef GEOMETRY_H
-#define GEOMETRY_H
+#ifndef GEOMETRYV1_H
+#define GEOMETRYV1_H
 
 #include <G4Types.hh>
 #include <G4Material.hh>
@@ -37,7 +37,7 @@ G4PVPlacement* place_teflon_surface(G4LogicalVolume* vessel);
 void place_encapsulation(G4LogicalVolume* vessel, field_cage_parameters const & fcp);
 void place_optical_surface_between(G4PVPlacement* one, G4PVPlacement* two, G4String name, G4double refelctivity);
 
-G4PVPlacement* geometry();
-G4PVPlacement* geometry_test();
+G4PVPlacement* GeometryV1();
+G4PVPlacement* GeometryV1_test();
 
 #endif
