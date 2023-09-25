@@ -34,6 +34,7 @@ void place_rings_in         (G4LogicalVolume* vessel, field_cage_parameters cons
 void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters const & fcp);
 
 G4PVPlacement* place_teflon_surface(G4LogicalVolume* vessel);
+void place_encapsulation(G4LogicalVolume* vessel, field_cage_parameters const & fcp);
 void place_optical_surface_between(G4PVPlacement* one, G4PVPlacement* two, G4String name, G4double refelctivity);
 
 G4PVPlacement* geometry();

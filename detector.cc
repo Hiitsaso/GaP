@@ -41,7 +41,7 @@ bool process_hits_anode(G4Step *step){
 }
 
 bool process_hits(G4Step *step){			
-	const std::string& filename_map = "nan.txt";
+	const std::string& filename_map = "files_7PMTs/nan.txt";
 	//~ const std::string& filename_map_primaries = "nan.txt";
 	G4Track* track = step -> GetTrack();
 	G4String particleType = track->GetDefinition()->GetParticleName();			

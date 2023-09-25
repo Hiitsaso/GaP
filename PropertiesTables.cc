@@ -19,7 +19,6 @@
 #include <vector>
 
 using namespace CLHEP;
-
 using vecd = std::vector<G4double>;
 
 const G4double optPhotMinE_   =  0.2  * eV;
@@ -40,7 +39,7 @@ G4MaterialPropertiesTable* aluminum_properties(){
 	return n4::material_properties()
 		//~ .add("REALRINDEX",  {9.686*eV, 2.954*eV}, {0.049467, 0.54105})
 		//~ .add("IMAGINARYRINDEX",  {9.686*eV, 2.954*eV}, {1.2201, 5.0843})
-		//~ .add("RINDEX", {9.686*eV, 2.954*eV}, {1., 1.})
+		.add("RINDEX", {9.686*eV, 2.954*eV}, {1., 1.})
 		.done(); 
 }
 
@@ -349,5 +348,27 @@ G4MaterialPropertiesTable* FakeDielectric_properties(G4double pressure,
        "RESOLUTIONSCALE",
        "ATTACHMENT"})
      .done();
+}
+
+//////////////////////////////////////////////////////////////////////// 
+G4MaterialPropertiesTable* teflon_properties(){ 
+	// Values could be taken from "Optical properties of Teflon AF amorphous fluoropolymers" by Yang, French & Tokarsky (using AF2400, Fig.6)
+    // but are also stated in the same paper as above
+    const vecd OPTPHOT_ENERGY_RANGE{1*eV, 10*eV};
+    const G4double noAbsLength_   = 1.e8  * m;
+	return n4::material_properties()
+		.add("RINDEX", OPTPHOT_ENERGY_RANGE, {1.35, 1.35})
+        .add("ABSLENGTH", OPTPHOT_ENERGY_RANGE, noAbsLength_)
+        .done();
+}
+
+//////////////////////////////////////////////////////////////////////// 
+G4MaterialPropertiesTable* air_properties(){ 
+	// TODO: remove duplication of hc (defined in both materials.cc and geometry.cc)
+	const G4double hc = CLHEP::h_Planck * CLHEP::c_light;
+	const vecd OPTPHOT_ENERGY_RANGE{1*eV, 8.21*eV};
+	return n4::material_properties()
+		.add("RINDEX", OPTPHOT_ENERGY_RANGE, {1, 1})
+        .done();
 }
 

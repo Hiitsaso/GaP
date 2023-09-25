@@ -25,5 +25,6 @@ G4Material* GAr_with_properties(G4double pressure, G4double temperature, G4doubl
 
 G4Material* air_with_properties();
 G4Material* teflon_with_properties();
+G4Material* plastic_with_properties();
 
 #endif

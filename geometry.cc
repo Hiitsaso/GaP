@@ -97,6 +97,7 @@ G4Material* tpb;
 G4Material* gas;
 G4Material* air;
 G4Material* teflon;
+G4Material* plastic;
 G4LogicalVolume* world;
 G4PVPlacement* coating_tpb_place;
 
@@ -119,6 +120,8 @@ void ensure_initialized() {
   peek   = peek_with_properties();
   quartz = quartz_with_properties();
   tpb    = TPB_with_properties();
+  
+  plastic = plastic_with_properties();
   
   world = n4::box("world").cube(world_size).volume(vacuum);
  
@@ -317,8 +320,8 @@ void place_pmt_holder_in(G4LogicalVolume* vessel) {
   //Build PMT
   G4Tubs* solid_pmt = n4::tubs("SolidPMT").r(pmt_rad).z(pmt_length).solid(); // Hamamatsu pmt length: 43*mm | STEP pmt gap length: 57.5*mm
   G4LogicalVolume* logic_pmt = new G4LogicalVolume(solid_pmt, aluminum, "PMT");
-  //~ auto sensitive_detector = new n4::sensitive_detector("DetectorPMT", process_hits);
-  //~ logic_pmt -> SetSensitiveDetector(sensitive_detector);
+  auto sensitive_detector = new n4::sensitive_detector("DetectorPMT", process_hits);
+  logic_pmt -> SetSensitiveDetector(sensitive_detector);
   
   // Position pairs (x,Y) for PMTs
   std::vector <float> pmt_PsX={-15.573,  20.68 , -36.253, 0, 36.253, -20.68 , 15.573};
@@ -392,6 +395,9 @@ field_cage_parameters model_something_old() {
   fcp.cathode_z = 4.505*mm + mesh_thickn/2 - delta_drift_el;  //cathode center from vessel center
   fcp.cathode_z_new = 4.505*mm + mesh_thickn/2 + meshBracket_thickn*3/2 - delta_drift_el;  //cathode center from vessel center
 	//auto cathode_z = 4.505*mm + mesh_thickn/2 + 2*D + 5*d + 6*ring_thickn;  //cathode center from vessel center
+	
+  //~ auto cathode_z_new_ = 4.505*mm + mesh_thickn/2 + meshBracket_thickn*3/2 - delta_drift_el; 
+  //~ fcp.cathode_z_new = 85*mm - 10.52*mm,
 
   // Cathode Bracket
   fcp.cathBracket_z = fcp.cathode_z;
@@ -424,7 +430,8 @@ field_cage_parameters model_something_new() {
   fcp.cathBracket_z_new = 8.005*mm - meshBracket_thickn/2;
 
   //Gas
-  fcp.drift_length  = 19.825*mm - mesh_thickn;
+  //~ fcp.drift_length  = 19.825*mm - mesh_thickn;
+  fcp.drift_length  = 85*mm;
   fcp.el_length     = 10.775*mm + mesh_thickn;
 
   // Drift
@@ -473,6 +480,7 @@ void place_anode_el_gate_in (G4LogicalVolume* vessel, field_cage_parameters cons
 
   // Gate Bracket
   auto gateBracket_z = gate_z; //CENTER??? 
+  G4cout << "HEREEEEEEEEEEEEEEEEE" << "gateBracket_z" << gateBracket_z << G4endl;
   n4::tubs("gateBracket").r_inner(mesh_rad).r(meshBracket_rad).z(meshBracket_thickn).place(steel).in(vessel).at_z(gateBracket_z).check_overlaps().now();
 
   //Anode
@@ -539,13 +547,13 @@ void place_optical_surface_between(G4PVPlacement* one, G4PVPlacement* two, G4Str
     new G4LogicalBorderSurface(name, one, two, optical_surface);
 }
 
-G4PVPlacement* place_teflon_surface(G4LogicalVolume* vessel){
-  auto teflon_length  = pmt_z - pmt_length/2 + vessel_length/2; 
-  auto teflon_z = vessel_length/2 - teflon_length/2;
+G4PVPlacement* place_teflon_surface(G4LogicalVolume* vessel, field_cage_parameters const & fcp){
+  auto teflon_length  = 85*mm - meshBracket_thickn; 
+  auto teflon_z = fcp.cathode_z_new - teflon_length/2 - meshBracket_thickn/2;
   teflon              = teflon_with_properties();
-  auto teflon_r_inner = meshBracket_rad + 1.*mm;
-  auto teflon_r       = teflon_r_inner  + 0.25*mm;
-  auto teflon_thickn = teflon_r - teflon_r_inner;
+  auto teflon_thickn = 3*mm;
+  auto teflon_r_inner = meshBracket_rad;
+  auto teflon_r = teflon_r_inner + teflon_thickn;
   auto teflon_z_L = teflon_z - teflon_length + teflon_thickn/2;
   auto teflon_z_R = teflon_z + teflon_length - teflon_thickn/2;
   
@@ -561,6 +569,13 @@ G4PVPlacement* place_teflon_surface(G4LogicalVolume* vessel){
     .place(teflon).in(vessel).at_z(teflon_z).check_overlaps().now();
   
   return teflon_surface;
+}
+
+void place_encapsulation(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {
+	auto encapsulation_rad = 3.*mm;
+	auto encapsulation_lenght = 3.*mm; 
+	auto encapsulation_z = fcp.cathode_z_new + 0.075*mm + encapsulation_lenght/2;
+	n4::tubs("RadioactiveSourceEncapsulation").r(encapsulation_rad).z(encapsulation_lenght).place(plastic).in(vessel).at_z(encapsulation_z).check_overlaps().now();
 }
 
 G4PVPlacement* geometry() {
@@ -597,11 +612,13 @@ G4PVPlacement* geometry() {
   n4::tubs("cathode"       ).                  r(mesh_rad       ).z(mesh_thickn       ).place(mesh_mat).in(vessel).at_z(    cathode_z).check_overlaps().now();
   n4::tubs("CathodeBracket").r_inner(mesh_rad).r(meshBracket_rad).z(meshBracket_thickn).place(steel   ).in(vessel).at_z(cathBracket_z).check_overlaps().now();
   n4::tubs("gas_drift"     ).                  r(drift_r        ).z(drift_length      ).place(gas     ).in(vessel).at_z(      drift_z).check_overlaps().now();
+  G4cout << "HEREEEEEEEEEEEEEEEEE" << "CATHODE" << cathode_z << G4endl;
 
   place_anode_el_gate_in(vessel, fcp);
   place_quartz_window_holder_in(vessel);
+  //~ place_encapsulation(vessel, fcp);
   
-  //~ auto teflon_surface = place_teflon_surface(vessel);
+  //~ auto teflon_surface = place_teflon_surface(vessel, fcp);
   //~ place_optical_surface_between(teflon_surface, vessel_place, "VesselTeflonSurface1", 0.5);
   //~ place_optical_surface_between(vessel_place, teflon_surface, "VesselTeflonSurface2", 0.5);
   

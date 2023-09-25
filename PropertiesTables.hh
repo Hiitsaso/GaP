@@ -25,4 +25,7 @@ G4MaterialPropertiesTable* FakeDielectric_properties(G4double pressure,
                                                      G4double e_lifetime,
                                                      G4double photoe_p);
 
+G4MaterialPropertiesTable*    teflon_properties();
+G4MaterialPropertiesTable*    air_properties();
+
 #endif

@@ -6,6 +6,7 @@
 
 #include "ParticleGenerator.hh"
 #include "kr83.hh"
+#include "PositionGenerator.hh"
 
 #include <CLHEP/Units/PhysicalConstants.h>
 #include <FTFP_BERT.hh>
@@ -129,7 +130,7 @@ void generate_Ba133(G4Event* event, G4ThreeVector position, G4double /*time*/){
 }
 
 void generate_ion_decay(G4Event* event, G4ThreeVector position, G4double /*time*/){
-    std::string IonName{"Kr83m"};
+    std::string IonName{"Am241"};
 
     G4int A, Z;
     G4double E = 0;

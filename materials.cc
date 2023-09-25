@@ -18,7 +18,6 @@
 #include <vector>
 
 using namespace CLHEP;
-using vec_double = std::vector<G4double>;
 
 //////////////////////////////////////////////////////////////////////// OK
 
@@ -130,15 +129,8 @@ G4Material* GAr_with_properties(G4double pressure, G4double temperature, G4doubl
 ////////////////////////////////////////////////////////////////////////
 
 G4Material* air_with_properties() {
-	// TODO: remove duplication of hc (defined in moth materials.cc and geometry.cc)
-	const G4double hc = CLHEP::h_Planck * CLHEP::c_light;
-	const vec_double OPTPHOT_ENERGY_RANGE{1*eV, 8.21*eV};
-	
-    auto air = n4::material("G4_AIR");
-    G4MaterialPropertiesTable *mpt_air = n4::material_properties()
-        .add("RINDEX", OPTPHOT_ENERGY_RANGE, {1, 1})
-        .done();
-    air -> SetMaterialPropertiesTable(mpt_air);
+	auto air = n4::material("G4_AIR");
+    air -> SetMaterialPropertiesTable(air_properties());
     return air;
 }
 
@@ -146,16 +138,14 @@ G4Material* air_with_properties() {
 
 G4Material* teflon_with_properties(){
 	auto teflon = n4::material("G4_TEFLON");
-	// Values could be taken from "Optical properties of Teflon AF amorphous fluoropolymers" by Yang, French & Tokarsky (using AF2400, Fig.6)
-    // but are also stated in the same paper as above
-    const vec_double OPTPHOT_ENERGY_RANGE{1*eV, 10*eV};
-    const G4double noAbsLength_   = 1.e8  * m;
-    G4MaterialPropertiesTable *mpt_teflon = n4::material_properties()
-        .add("RINDEX", OPTPHOT_ENERGY_RANGE, {1.35, 1.35})
-        .add("ABSLENGTH", OPTPHOT_ENERGY_RANGE, noAbsLength_)
-        .done();
-    teflon -> SetMaterialPropertiesTable(mpt_teflon);
+    teflon -> SetMaterialPropertiesTable(teflon_properties());
     return teflon;
 }
+//////////////////////////////////////////////////////////////////////// OK
 
+G4Material* plastic_with_properties() {
+  auto plastic = n4::material("G4_PLASTIC_SC_VINYLTOLUENE");
+  //~ plastic -> SetMaterialPropertiesTable(plastic_properties()) ;
+  return plastic;
+}
 
