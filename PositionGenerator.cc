@@ -2,13 +2,13 @@
 #include "g4-mandatory.hh"
 
 #include "PositionGenerator.hh"
-#include "GeometryV1.hh"
+#include "GeometryV2.hh"
 
 #include <G4SystemOfUnits.hh>
 #include <G4RandomDirection.hh>
 
 G4ThreeVector random_generator_inside_drift(std::optional<G4double> fixed_z){
-	field_cage_parameters fcp = model_something_old();
+	field_cage_parameters fcp = help();
 	auto meshBracket_rad_     = 180./2 *mm;
     
     auto zmin  = fcp.drift_z_new - fcp.drift_length/2;
@@ -28,7 +28,7 @@ G4ThreeVector random_generator_inside_drift(std::optional<G4double> fixed_z){
 }
 
 G4ThreeVector random_generator_inside_el(std::optional<G4double> fixed_z){    
-	field_cage_parameters fcp = model_something_old();
+	field_cage_parameters fcp = help();
 	auto meshBracket_rad_     = 180./2 *mm;
 	
     auto zmin  = fcp.el_z - fcp.el_length/2;

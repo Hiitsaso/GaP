@@ -9,7 +9,7 @@
 #include "G4RadioactiveDecayPhysics.hh"
 
 #include "kr83.hh"
-#include "GeometryV1.hh"
+#include "GeometryV2.hh" //creo que se puede quitar
 #include "PositionGenerator.hh"
 
 

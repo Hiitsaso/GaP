@@ -4,7 +4,7 @@
 #include "n4-utils.hh"
 #include "n4-volumes.hh"
 
-#include "GeometryV1.hh"
+#include "GeometryV2.hh"
 #include "ParticleGenerator.hh"
 #include "kr83.hh"
 #include "PositionGenerator.hh"
@@ -374,7 +374,7 @@ const std::string filename_event_2 = "nan.txt";
 
 ////////////////////////////////////////////////////////////////////////
 
-    //n4::silence hush{G4cout};
+    n4::silence hush{G4cout};
 
     G4int verbosity = 0;
     auto physics_list = new FTFP_BERT{verbosity};
@@ -384,7 +384,7 @@ const std::string filename_event_2 = "nan.txt";
     physics_list -> RegisterPhysics(new G4DecayPhysics());
 
 	auto generic_messenger = new G4GenericMessenger(nullptr,"/beam/", "Particle beam generator");
-	field_cage_parameters fcp = model_something_old();
+	field_cage_parameters fcp = help();
 	G4double fixed_z = 0.;
 	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
 	G4String particleDefinition = "opticalphoton";
@@ -419,7 +419,7 @@ const std::string filename_event_2 = "nan.txt";
                                                 -> set((new n4::event_action) -> end(event_counter) -> begin(reset_energy))
                                                 -> set((new n4::run_action) -> begin(delete_file_map_and_reset_eventCounter)));
                                                 
-    run_manager -> SetUserInitialization(new n4::geometry{GeometryV1}); 
+    run_manager -> SetUserInitialization(new n4::geometry{GeometryV2}); 
 
     // auto world = get_world();
     // //auto& place_something_in = place_mesh_holder_in;
