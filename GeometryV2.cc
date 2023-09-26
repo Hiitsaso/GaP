@@ -33,8 +33,17 @@ using vecd = std::vector<G4double>;
 
 const auto world_size = 0.5 * m;
 
+G4Material* peek;
+G4Material* steel;
+G4Material* aluminum;
+G4Material* Cu;
 G4Material* vacuum;
-
+G4Material* mesh_mat;
+G4Material* quartz;
+G4Material* tpb;
+G4Material* gas;
+G4Material* air;
+G4Material* teflon;
 G4LogicalVolume* world;
 
 field_cage_parameters help() {
@@ -69,7 +78,18 @@ void ensure_initialized() {
   if (initialized) { return; }
   initialized = true;
 
-  vacuum = n4::material("G4_Galactic");   
+  Cu     = n4::material("G4_Cu"); 
+  vacuum = n4::material("G4_Galactic");
+  steel  = steel_with_properties();
+  aluminum = aluminum_with_properties();
+  //~ gas      = GAr_with_properties(pressure, temperature, sc_yield, elifetime);
+  //~ mesh_mat = FakeDielectric_with_properties(gas, "mesh_mat",
+                                            //~ pressure, temperature, mesh_transparency, mesh_thickn,
+                                            //~ sc_yield, elifetime, photoe_prob);
+  peek   = peek_with_properties();
+  quartz = quartz_with_properties();
+  tpb    = TPB_with_properties();
+  teflon = teflon_with_properties();
   world = n4::box("world").cube(world_size).volume(vacuum);
 }
 
