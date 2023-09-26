@@ -8,11 +8,11 @@
 #include <G4RandomDirection.hh>
 
 G4ThreeVector random_generator_inside_drift(std::optional<G4double> fixed_z){
-	field_cage_parameters fcp = help();
+	field_cage_parameters fcp = version2_parameters();
 	auto meshBracket_rad_     = 180./2 *mm;
     
-    auto zmin  = fcp.drift_z_new - fcp.drift_length/2;
-    auto zmax  = fcp.drift_z_new + fcp.drift_length/2;
+    auto zmin  = fcp.drift_z - fcp.drift_length/2;
+    auto zmax  = fcp.drift_z + fcp.drift_length/2;
     
     auto r     = G4RandFlat::shoot(   0., meshBracket_rad_);
     auto angle = G4RandFlat::shoot(   0.,           2*M_PI);
@@ -28,7 +28,7 @@ G4ThreeVector random_generator_inside_drift(std::optional<G4double> fixed_z){
 }
 
 G4ThreeVector random_generator_inside_el(std::optional<G4double> fixed_z){    
-	field_cage_parameters fcp = help();
+	field_cage_parameters fcp = version2_parameters();
 	auto meshBracket_rad_     = 180./2 *mm;
 	
     auto zmin  = fcp.el_z - fcp.el_length/2;

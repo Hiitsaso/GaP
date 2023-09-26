@@ -374,7 +374,7 @@ const std::string filename_event_2 = "nan.txt";
 
 ////////////////////////////////////////////////////////////////////////
 
-    n4::silence hush{G4cout};
+    //~ n4::silence hush{G4cout};
 
     G4int verbosity = 0;
     auto physics_list = new FTFP_BERT{verbosity};
@@ -384,7 +384,7 @@ const std::string filename_event_2 = "nan.txt";
     physics_list -> RegisterPhysics(new G4DecayPhysics());
 
 	auto generic_messenger = new G4GenericMessenger(nullptr,"/beam/", "Particle beam generator");
-	field_cage_parameters fcp = help();
+	field_cage_parameters fcp = version2_parameters();
 	G4double fixed_z = 0.;
 	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
 	G4String particleDefinition = "opticalphoton";
@@ -408,7 +408,7 @@ const std::string filename_event_2 = "nan.txt";
 		//auto kr83m_nexus= [](auto event){ kr83_generator(event, 32.1473*keV, 9.396*keV,  0.0490, 154.*ns); }; 
 	auto vessel_out_rad_ = 288./2  *mm;
 	auto encapsulation_lenght = 3.*mm; 
-	auto encapsulation_z = fcp.cathode_z_new + 0.075*mm + encapsulation_lenght/2;
+	auto encapsulation_z = fcp.cathode_z + 0.075*mm + encapsulation_lenght/2;
 	//~ auto ion = [vessel_out_rad_](auto event){generate_ion_decay(event, {vessel_out_rad_*cos(0.), vessel_out_rad_*sin(0.), 0.}, 0);};  //From the surface
 	//~ auto ion = [encapsulation_z](auto event){generate_ion_decay(event, {0., 0., encapsulation_z}, 0);};  //From the surface of the cathode
 
