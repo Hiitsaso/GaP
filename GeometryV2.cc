@@ -103,9 +103,9 @@ field_cage_parameters version2_parameters() {
 
   fcp.pmt_length = 43.0  *mm;
   
-  fcp.rings_out_rad    = 175./2  *mm;
-  fcp.rings_int_rad    = 165./2  *mm;
-  fcp.rings_length     = 10.     *mm;
+  fcp.rings_rad    = 165./2  *mm;
+  fcp.rings_thickn = 5.      *mm;
+  fcp.rings_length = 10.     *mm;
   
   fcp.teflon_cage_rad    = 120./2  *mm;
   fcp.teflon_cage_thickn = 5.      *mm;
@@ -195,7 +195,7 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
     all_pos_pmt.push_back(temp_vector);   
 
     n4::place(logic_pmt).in(vessel).at(pos_pmt).copy_no(i).check_overlaps().now();
-}
+  }
 
   auto PMtplateBottom1 =   
   /*      */n4::tubs("solid_PMTplateBottom1").r(fcp.plateBottom_pmt_rad).z(fcp.plateBottom_pmt_length)
@@ -224,11 +224,25 @@ void place_teflon_cage_in(G4LogicalVolume* vessel, field_cage_parameters const &
   n4::tubs("TeflonCage").r_inner(fcp.teflon_cage_rad).r_delta(fcp.teflon_cage_thickn).z(fcp.teflon_cage_lenght).place(teflon).in(vessel).at_z(fcp.teflon_cage_z).check_overlaps().now();
 }
 
+void place_rings_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) { 
+  auto logic_ring = n4::tubs("ring").r_inner(fcp.rings_rad).r_delta(fcp.rings_thickn).z(fcp.rings_length).volume(Cu);
+  
+  auto gate_to_ring = 5. *mm;
+  auto ring_to_ring = 3. *mm;
+  auto ring_z       = 0. *mm;
+  
+  for (G4int i = 0; i < 6; i++) {
+    ring_z = fcp.gateBracket_z + fcp.meshBracket_thickn + gate_to_ring + fcp.rings_length/2*(2*i + 1) + ring_to_ring*i; 
+    n4::place(logic_ring).in(vessel).at_z(ring_z).copy_no(i).check_overlaps().now();
+  }
+}
+
+
 G4PVPlacement* GeometryV2() {
   field_cage_parameters fcp = version2_parameters();
   ensure_initialized(fcp);
       
-  auto vessel_steel = n4::tubs("vessel_steel").r_inner(fcp.vessel_rad).r(fcp.vessel_out_rad).z(fcp.vessel_out_length).volume(steel); //esto no me da tapas, que realmente me viene bien, pero es un poco raro
+  auto vessel_steel = n4::tubs("vessel_steel").r_inner(fcp.vessel_rad).r(fcp.vessel_out_rad).z(fcp.vessel_out_length).volume(steel); 
   n4::place(vessel_steel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   auto vessel       = n4::tubs("GasVessel").r(fcp.vessel_rad).z(fcp.vessel_length).volume(gas);
   n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
@@ -236,6 +250,7 @@ G4PVPlacement* GeometryV2() {
   place_pmt_holder_in(vessel, fcp);
   place_cage_in(vessel, fcp);
   place_teflon_cage_in(vessel, fcp);
+  place_rings_in(vessel, fcp);
   
   return n4::place(world).now();
 }

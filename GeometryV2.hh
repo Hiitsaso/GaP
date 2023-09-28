@@ -49,8 +49,8 @@ struct field_cage_parameters {
   
   G4double pmt_length;
   
-  G4double rings_out_rad;
-  G4double rings_int_rad;
+  G4double rings_rad;
+  G4double rings_thickn;
   G4double rings_length;
   
   G4double teflon_cage_rad;
