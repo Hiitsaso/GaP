@@ -76,7 +76,7 @@ field_cage_parameters version2_parameters() {
   fcp.meshBracket_rad      = 180./2  *mm;
   fcp.meshBracket_thickn   = 5.      *mm;
   fcp.anodeBracket_rad     = 160./2  *mm;
-  fcp.anodeBracket_thickn  = 6.      *mm;
+  fcp.anodeBracket_thickn  = 4.      *mm; //no se si es el anodo de antes
 
   fcp.pmt_rad = 25.4/2  *mm;
 
@@ -107,15 +107,24 @@ field_cage_parameters version2_parameters() {
   fcp.rings_int_rad    = 165./2  *mm;
   fcp.rings_length     = 10.     *mm;
   
+  fcp.teflon_cage_rad    = 120./2  *mm;
+  fcp.teflon_cage_thickn = 5.      *mm;
+  fcp.teflon_cage_lenght = 87.     *mm;
+  
 	//faltan las medidas de los anillos, 
   
   //S1 AND S2 LENGTHS
-  fcp.drift_length = 0*mm;
-  fcp.el_length    = 0*mm;
+  fcp.drift_length = 87 *mm;
+  fcp.el_length    = 10 *mm;
   
   //POSITIONS(faltan por medir)
   fcp.vessel_z = fcp.vessel_length/2 - (163.5*mm + fcp.meshBracket_thickn);
-  fcp.cathBracket_z = -fcp.vessel_z; //From the vessel (and at the origin or the world)
+  
+  fcp.cathBracket_z  = -fcp.vessel_z; //From the vessel (and at the origin or the world)
+  fcp.gateBracket_z  = fcp.cathBracket_z + fcp.meshBracket_thickn   + fcp.el_length;
+  fcp.anodeBracket_z = fcp.gateBracket_z + fcp.meshBracket_thickn/2 + fcp.drift_length + fcp.anodeBracket_thickn/2;
+  
+  fcp.teflon_cage_z  = fcp.gateBracket_z + fcp.meshBracket_thickn/2 + fcp.teflon_cage_lenght/2; 
   
   fcp.pmt_z    = - (12.*mm + fcp.meshBracket_thickn/2 + fcp.pmt_length/2) + fcp.cathBracket_z; 
   fcp.plateUp_pmt_z = - ( 150.5*mm + fcp.meshBracket_thickn/2 + fcp.plateUp_pmt_length/2) + fcp.cathBracket_z;
@@ -186,7 +195,7 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
     all_pos_pmt.push_back(temp_vector);   
 
     n4::place(logic_pmt).in(vessel).at(pos_pmt).copy_no(i).check_overlaps().now();
-  }
+}
 
   auto PMtplateBottom1 =   
   /*      */n4::tubs("solid_PMTplateBottom1").r(fcp.plateBottom_pmt_rad).z(fcp.plateBottom_pmt_length)
@@ -200,6 +209,21 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
   .name("PMTplateBottom1").place(steel).in(vessel).at_z(fcp.PMTplateBottom1_pos_z).check_overlaps().now();;
 }
 
+void place_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) { 
+  //Cathode bracket
+  n4::tubs("CathodeBracket").r_inner(fcp.mesh_rad).r(fcp.meshBracket_rad).z(fcp.meshBracket_thickn).place(steel).in(vessel).at_z(fcp.cathBracket_z).check_overlaps().now();
+  
+  //Gate bracket
+  n4::tubs("gateBracket").r_inner(fcp.mesh_rad).r(fcp.meshBracket_rad).z(fcp.meshBracket_thickn).place(steel).in(vessel).at_z(fcp.gateBracket_z).check_overlaps().now();
+
+  //Anode bracket
+  n4::tubs("AnodeBracket").r_inner(fcp.mesh_rad).r(fcp.anodeBracket_rad).z(fcp.anodeBracket_thickn).place(steel).in(vessel).at_z(fcp.anodeBracket_z).check_overlaps().now();
+}
+
+void place_teflon_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) { 
+  n4::tubs("TeflonCage").r_inner(fcp.teflon_cage_rad).r_delta(fcp.teflon_cage_thickn).z(fcp.teflon_cage_lenght).place(teflon).in(vessel).at_z(fcp.teflon_cage_z).check_overlaps().now();
+}
+
 G4PVPlacement* GeometryV2() {
   field_cage_parameters fcp = version2_parameters();
   ensure_initialized(fcp);
@@ -210,6 +234,8 @@ G4PVPlacement* GeometryV2() {
   n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   
   place_pmt_holder_in(vessel, fcp);
+  place_cage_in(vessel, fcp);
+  place_teflon_cage_in(vessel, fcp);
   
   return n4::place(world).now();
 }

@@ -52,6 +52,10 @@ struct field_cage_parameters {
   G4double rings_out_rad;
   G4double rings_int_rad;
   G4double rings_length;
+  
+  G4double teflon_cage_rad;
+  G4double teflon_cage_thickn;
+  G4double teflon_cage_lenght;
 
   //S1 AND S2 LENGTHS
   G4double drift_length;
@@ -60,6 +64,10 @@ struct field_cage_parameters {
   //POSITIONS
   G4double vessel_z; 
   G4double cathBracket_z;
+  G4double gateBracket_z;
+  G4double anodeBracket_z;
+  
+  G4double teflon_cage_z;
   
   G4double pmt_z;
   G4double plateUp_pmt_z;
