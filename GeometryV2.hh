@@ -36,6 +36,9 @@ struct field_cage_parameters {
   G4double plate_pmt_length;
   G4double plateUp_pmt_length;
   G4double plateUp_pmt_thickn;
+  G4double plateUp_pmt_rad;
+  G4double plateBottom_pmt_length;
+  G4double plateBottom_pmt_rad;
   
   G4double pmtHolder_rad;
   G4double pmtHolder_length;
@@ -56,8 +59,15 @@ struct field_cage_parameters {
   
   //POSITIONS
   G4double vessel_z; 
-  G4double cathode_z; 
   G4double cathBracket_z;
+  
+  G4double pmt_z;
+  G4double plateUp_pmt_z;
+  G4double enclosure_pmt_z;
+  G4double plate_pmt_z;
+  G4double PMTplateBottom1_pos_z;
+  
+  G4double cathode_z; 
   G4double drift_z;  
   G4double el_z;
   

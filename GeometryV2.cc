@@ -15,7 +15,7 @@
 //~ #include <G4PVPlacement.hh>
 //~ #include <G4RandomDirection.hh>
 //~ #include <G4RunManagerFactory.hh>
-//~ #include <G4SubtractionSolid.hh>
+#include <G4SubtractionSolid.hh>
 //~ #include <G4SystemOfUnits.hh>
 //~ #include <G4Tubs.hh>
 //~ #include <G4UnionSolid.hh>
@@ -87,10 +87,13 @@ field_cage_parameters version2_parameters() {
 
   fcp.plate_pmt_rad        = 105./2  *mm;
   fcp.plate_pmt_thickn     = 105./2  *mm;
-  fcp.plate_pmt_length     = 10      *mm;
+  fcp.plate_pmt_length     = 20      *mm;
   fcp.plateUp_pmt_length   = 15      *mm;
   fcp.plateUp_pmt_thickn   = 21.5    *mm;
-
+  fcp.plateUp_pmt_rad      = 126./2  *mm;
+  fcp.plateBottom_pmt_length   = 22      *mm;
+  fcp.plateBottom_pmt_rad      = 105./2  *mm;
+  
   fcp.pmtHolder_rad        = 115./2  *mm;
   fcp.pmtHolder_length     = 9       *mm;
 
@@ -112,15 +115,20 @@ field_cage_parameters version2_parameters() {
   
   //POSITIONS(faltan por medir)
   fcp.vessel_z = fcp.vessel_length/2 - (163.5*mm + fcp.meshBracket_thickn);
+  fcp.cathBracket_z = -fcp.vessel_z; //From the vessel (and at the origin or the world)
+  
+  fcp.pmt_z    = - (12.*mm + fcp.meshBracket_thickn/2 + fcp.pmt_length/2) + fcp.cathBracket_z; 
+  fcp.plateUp_pmt_z = - ( 150.5*mm + fcp.meshBracket_thickn/2 + fcp.plateUp_pmt_length/2) + fcp.cathBracket_z;
+  fcp.enclosure_pmt_z = fcp.plateUp_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plateUp_pmt_length/2;
+  fcp.plate_pmt_z = fcp.enclosure_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plate_pmt_length/2;
+  fcp.PMTplateBottom1_pos_z = fcp.pmt_z;
   
   fcp.cathode_z = 1*mm; 
-  fcp.cathBracket_z =  1*mm;
   fcp.drift_z = 14.8*mm;  
   fcp.el_z = 14.8*mm;
 
   return fcp;
 }
-
 
 void ensure_initialized(field_cage_parameters const & fcp) {
   static bool initialized = false;
@@ -147,15 +155,61 @@ G4LogicalVolume* get_world(field_cage_parameters const & fcp) {
   return world;
 }
 
+void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {     
+  //Upper steel plate at the pmt clad
+  n4::tubs("PMTplateUp").r_inner(fcp.plateUp_pmt_rad).r_delta(fcp.plateUp_pmt_thickn).z(fcp.plateUp_pmt_length).place(steel).in(vessel).at_z(fcp.plateUp_pmt_z).check_overlaps().now();
+  
+  //PMT clad
+  n4::tubs("EnclosurePMT").r_inner(fcp.enclosure_pmt_rad).r_delta(fcp.enclosure_pmt_thickn).z(fcp.enclosure_pmt_length).place(steel).in(vessel).at_z(fcp.enclosure_pmt_z).check_overlaps().now();
+  
+  // Steel plate attached where the peek holders are attached
+  n4::tubs("PMTplateBottom0").r_inner(fcp.plate_pmt_rad).r_delta(fcp.plate_pmt_thickn).z(fcp.plate_pmt_length).place(steel).in(vessel).at_z(fcp.plate_pmt_z).check_overlaps().now();
+  
+  // Position pairs (x,Y) for PMTs
+  std::vector <float> pmt_PsX={-15.573,  20.68 , -36.253, 0, 36.253, -20.68 , 15.573};
+  std::vector <float> pmt_PsY={-32.871, -29.922,  -2.949, 0,  2.949,  29.922, 32.871};
+  
+  //Build PMT and PMTplateBottom1
+  auto solid_pmt = n4::tubs("solid_PMT").r(fcp.pmt_rad).z(fcp.pmt_length).solid(); //Hamamatsu pmt length: 43*mm | STEP pmt gap length: 57.5*mm
+  G4LogicalVolume* logic_pmt = new G4LogicalVolume(solid_pmt, aluminum, "PMT");
+ 
+  G4ThreeVector pos_pmt = {0, 0, 0};
+  std::vector<std::vector<G4ThreeVector>> all_pos_pmt;
+  
+  for (G4int i = 0; i < G4int(pmt_PsX.size()); i++) {
+    pos_pmt = G4ThreeVector(pmt_PsX[i]*mm, pmt_PsY[i]*mm, fcp.pmt_z);
+    
+    G4ThreeVector temp_pos_pmt;
+    std::vector<G4ThreeVector> temp_vector; 
+    temp_pos_pmt = {pos_pmt[0], pos_pmt[1], 0.};
+    temp_vector.push_back(temp_pos_pmt); 
+    all_pos_pmt.push_back(temp_vector);   
+
+    n4::place(logic_pmt).in(vessel).at(pos_pmt).copy_no(i).check_overlaps().now();
+  }
+
+  auto PMtplateBottom1 =   
+  /*      */n4::tubs("solid_PMTplateBottom1").r(fcp.plateBottom_pmt_rad).z(fcp.plateBottom_pmt_length)
+  .subtract(solid_pmt).at(all_pos_pmt[0][0])
+  .subtract(solid_pmt).at(all_pos_pmt[1][0])
+  .subtract(solid_pmt).at(all_pos_pmt[2][0])
+  .subtract(solid_pmt).at(all_pos_pmt[3][0])
+  .subtract(solid_pmt).at(all_pos_pmt[4][0])
+  .subtract(solid_pmt).at(all_pos_pmt[5][0])
+  .subtract(solid_pmt).at(all_pos_pmt[6][0])
+  .name("PMTplateBottom1").place(steel).in(vessel).at_z(fcp.PMTplateBottom1_pos_z).check_overlaps().now();;
+}
 
 G4PVPlacement* GeometryV2() {
   field_cage_parameters fcp = version2_parameters();
   ensure_initialized(fcp);
       
   auto vessel_steel = n4::tubs("vessel_steel").r_inner(fcp.vessel_rad).r(fcp.vessel_out_rad).z(fcp.vessel_out_length).volume(steel); //esto no me da tapas, que realmente me viene bien, pero es un poco raro
-  n4::place(vessel_steel).in(world).at_z(-fcp.vessel_z).check_overlaps().now();
+  n4::place(vessel_steel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   auto vessel       = n4::tubs("GasVessel").r(fcp.vessel_rad).z(fcp.vessel_length).volume(gas);
-  n4::place(vessel).in(world).at_z(-fcp.vessel_z).check_overlaps().now();
+  n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
+  
+  place_pmt_holder_in(vessel, fcp);
   
   return n4::place(world).now();
 }
