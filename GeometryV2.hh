@@ -18,11 +18,15 @@ struct field_cage_parameters {
   G4double mesh_rad;
   G4double mesh_thickn;
   G4double mesh_transparency;
-  
-  G4double meshBracket_rad;
-  G4double meshBracket_thickn;
+    
+  G4double cathBracket_rad;
+  G4double cathBracket_thickn;
+  G4double gateBracket_rad;
+  G4double gateBracket_thickn;
+  G4double meshBracket_length;
   G4double anodeBracket_rad;
   G4double anodeBracket_thickn;
+  G4double anodeBracket_length;
   
   G4double pmt_rad;
   
@@ -56,6 +60,16 @@ struct field_cage_parameters {
   G4double teflon_cage_rad;
   G4double teflon_cage_thickn;
   G4double teflon_cage_lenght;
+  
+  G4double teflon_ring1_rad;
+  G4double teflon_ring1_thickn;
+  G4double teflon_ring2_rad;
+  G4double teflon_ring2_thickn;
+  G4double teflon_ring3_rad;
+  G4double teflon_ring3_thickn;
+  G4double teflon_ring_length;
+  G4double teflon_ring_to_teflon_ring;
+  G4double teflon_ring0_length;
 
   //S1 AND S2 LENGTHS
   G4double drift_length;
@@ -68,6 +82,8 @@ struct field_cage_parameters {
   G4double anodeBracket_z;
   
   G4double teflon_cage_z;
+  G4double teflon_ring_z;
+  G4double teflon_ring0_z;
   
   G4double pmt_z;
   G4double plateUp_pmt_z;
