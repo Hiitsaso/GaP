@@ -43,6 +43,7 @@ G4Material* tpb;
 G4Material* gas;
 G4Material* air;
 G4Material* teflon;
+G4Material* plastic;
 G4LogicalVolume* world;
 
 field_cage_parameters version2_parameters() {
@@ -115,18 +116,20 @@ field_cage_parameters version2_parameters() {
   fcp.teflon_cage_thickn = 5.      *mm;
   fcp.teflon_cage_lenght = 87.     *mm;
   
-  fcp.teflon_ring1_rad           = 40./2   *mm;
-  fcp.teflon_ring1_thickn        = 19.     *mm;
-  fcp.teflon_ring2_rad           = 84./2   *mm;
-  fcp.teflon_ring2_thickn        = 10.     *mm;
-  fcp.teflon_ring3_rad           = 110./2  *mm;
-  fcp.teflon_ring3_thickn        = 5.      *mm;
-  fcp.teflon_ring_length         = 9.      *mm;
-  fcp.teflon_ring_to_teflon_ring = 3.      *mm;
-  fcp.teflon_ring0_length        = 5.      *mm;
+  fcp.ring1_rad                   = 40./2   *mm;
+  fcp.ring1_thickn                = 19.     *mm;
+  fcp.ring2_rad                   = 84./2   *mm;
+  fcp.ring2_thickn                = 10.     *mm;
+  fcp.ring3_rad                   = 110./2  *mm;
+  fcp.ring3_thickn                = 5.      *mm;
+  fcp.ring_length                 = 9.      *mm;
+  fcp.ring_to_ring                = 3.      *mm;
+  fcp.ring_bottom_to_ring0_bottom = 5.      *mm;
+  fcp.ring0_length                = 5.      *mm;
   
-  
-	//faltan las medidas de los anillos, 
+  fcp.encapsulation_rad    = 30./2  *mm;
+  fcp.encapsulation_lenght = 2.54   *mm; 
+  fcp.encapsulation_thickn = 2.6    *mm; 
   
   //S1 AND S2 LENGTHS
   fcp.drift_length = 87 *mm;
@@ -139,9 +142,11 @@ field_cage_parameters version2_parameters() {
   fcp.gateBracket_z  = fcp.cathBracket_z + fcp.meshBracket_length   + fcp.el_length;
   fcp.anodeBracket_z = fcp.gateBracket_z + fcp.meshBracket_length/2 + fcp.drift_length + fcp.anodeBracket_length/2;
   
-  fcp.teflon_cage_z   = fcp.gateBracket_z + fcp.meshBracket_length/2 + fcp.teflon_cage_lenght/2; 
-  fcp.teflon_ring_z   = fcp.anodeBracket_z - (fcp.teflon_ring_length - fcp.anodeBracket_length)/2; 
-  fcp.teflon_ring0_z  = fcp.teflon_ring_z - fcp.teflon_ring0_length; 
+  fcp.teflon_cage_z   = fcp.gateBracket_z  +  fcp.meshBracket_length/2 + fcp.teflon_cage_lenght/2; 
+  fcp.long_ring_z     = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2; 
+  fcp.teflon_ring_z   = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2 - fcp.ring_length/4; 
+  fcp.cathode_ring_z  = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2 + fcp.ring_length/4; 
+  fcp.ring0_z         = fcp.long_ring_z    + fcp.rings_length/2  -  fcp.ring_bottom_to_ring0_bottom - fcp.ring0_length/2; 
   
   fcp.pmt_z    = - (12.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathBracket_z; 
   fcp.plateUp_pmt_z = - ( 150.5*mm + fcp.meshBracket_length/2 + fcp.plateUp_pmt_length/2) + fcp.cathBracket_z;
@@ -152,6 +157,8 @@ field_cage_parameters version2_parameters() {
   fcp.cathode_z = 1*mm; 
   fcp.drift_z = 14.8*mm;  
   fcp.el_z = 14.8*mm;
+  
+  fcp.encapsulation_z = fcp.ring0_z - (fcp.ring0_length + fcp.encapsulation_lenght)/2;
 
   return fcp;
 }
@@ -169,10 +176,11 @@ void ensure_initialized(field_cage_parameters const & fcp) {
   mesh_mat = FakeDielectric_with_properties(gas, "mesh_mat",
                                             fcp.pressure, fcp.temperature, fcp.mesh_transparency, fcp.mesh_thickn,
                                             fcp.sc_yield, fcp.elifetime, fcp.photoe_prob);
-  peek   = peek_with_properties();
-  quartz = quartz_with_properties();
-  tpb    = TPB_with_properties();
-  teflon = teflon_with_properties();
+  peek    = peek_with_properties();
+  quartz  = quartz_with_properties();
+  tpb     = TPB_with_properties();
+  teflon  = teflon_with_properties();
+  plastic = plastic_with_properties();
   world = n4::box("world").cube(world_size).volume(vacuum);
 }
 
@@ -230,6 +238,12 @@ void place_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {
   //Cathode bracket
   n4::tubs("CathodeBracket").r_inner(fcp.gateBracket_rad).r_delta(fcp.cathBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.cathBracket_z).check_overlaps().now();
   
+  //"Cathode" rings (only half of the rings plus the one inside)
+  n4::tubs("CathodeRing0").r(      fcp.ring1_rad).z(fcp.ring0_length).place(steel).in(vessel).at_z(fcp.ring0_z).check_overlaps().now();
+  n4::tubs("CathodeRing1").r_inner(fcp.ring1_rad).r_delta(fcp.ring1_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
+  n4::tubs("CathodeRing2").r_inner(fcp.ring2_rad).r_delta(fcp.ring2_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
+  n4::tubs("CathodeRing3").r_inner(fcp.ring3_rad).r_delta(fcp.ring3_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
+  
   //Gate bracket
   n4::tubs("gateBracket").r_inner(fcp.gateBracket_rad).r_delta(fcp.gateBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.gateBracket_z).check_overlaps().now();
 
@@ -241,11 +255,15 @@ void place_teflon_cage_in(G4LogicalVolume* vessel, field_cage_parameters const &
   //Teflon cage
   n4::tubs("TeflonCage").r_inner(fcp.teflon_cage_rad).r_delta(fcp.teflon_cage_thickn).z(fcp.teflon_cage_lenght).place(teflon).in(vessel).at_z(fcp.teflon_cage_z).check_overlaps().now();
   
-  //Teflon rings
-  n4::tubs("TeflonRing0").r(      fcp.teflon_ring1_rad).z(fcp.teflon_ring0_length).place(teflon).in(vessel).at_z(fcp.teflon_ring0_z).check_overlaps().now();
-  n4::tubs("TeflonRing1").r_inner(fcp.teflon_ring1_rad).r_delta(fcp.teflon_ring1_thickn).z(fcp.teflon_ring_length).place(teflon).in(vessel).at_z(fcp.teflon_ring_z).check_overlaps().now();
-  n4::tubs("TeflonRing2").r_inner(fcp.teflon_ring2_rad).r_delta(fcp.teflon_ring2_thickn).z(fcp.teflon_ring_length).place(teflon).in(vessel).at_z(fcp.teflon_ring_z).check_overlaps().now();
-  n4::tubs("TeflonRing3").r_inner(fcp.teflon_ring3_rad).r_delta(fcp.teflon_ring3_thickn).z(fcp.teflon_ring_length).place(teflon).in(vessel).at_z(fcp.teflon_ring_z).check_overlaps().now();
+  //Teflon rings (only half of the rings)
+  n4::tubs("TeflonRing1").r_inner(fcp.ring1_rad).r_delta(fcp.ring1_thickn).z(fcp.ring_length/2).place(teflon).in(vessel).at_z(fcp.teflon_ring_z).check_overlaps().now();
+  n4::tubs("TeflonRing2").r_inner(fcp.ring2_rad).r_delta(fcp.ring2_thickn).z(fcp.ring_length/2).place(teflon).in(vessel).at_z(fcp.teflon_ring_z).check_overlaps().now();
+  n4::tubs("TeflonRing3").r_inner(fcp.ring3_rad).r_delta(fcp.ring3_thickn).z(fcp.ring_length/2).place(teflon).in(vessel).at_z(fcp.teflon_ring_z).check_overlaps().now();
+}
+
+void place_encapsulation_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {
+ n4::tubs("RadioactiveSourceEncapsulation").r(fcp.encapsulation_rad).z(fcp.encapsulation_lenght).place(plastic).in(vessel).at_z(fcp.encapsulation_z).check_overlaps().now();
+ //~ n4::tubs("RadioactiveSourceEncapsulation").r(fcp.encapsulation_rad).r_delta(fcp.encapsulation_thickn).z(fcp.encapsulation_lenght).place(plastic).in(vessel).at_z(fcp.encapsulation_z).check_overlaps().now();
 }
 
 void place_rings_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) { 
@@ -275,6 +293,7 @@ G4PVPlacement* GeometryV2() {
   place_cage_in(vessel, fcp);
   place_teflon_cage_in(vessel, fcp);
   place_rings_in(vessel, fcp);
+  place_encapsulation_in(vessel, fcp);
   
   return n4::place(world).now();
 }

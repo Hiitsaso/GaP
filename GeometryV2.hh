@@ -61,15 +61,20 @@ struct field_cage_parameters {
   G4double teflon_cage_thickn;
   G4double teflon_cage_lenght;
   
-  G4double teflon_ring1_rad;
-  G4double teflon_ring1_thickn;
-  G4double teflon_ring2_rad;
-  G4double teflon_ring2_thickn;
-  G4double teflon_ring3_rad;
-  G4double teflon_ring3_thickn;
-  G4double teflon_ring_length;
-  G4double teflon_ring_to_teflon_ring;
-  G4double teflon_ring0_length;
+  G4double ring1_rad;
+  G4double ring1_thickn;
+  G4double ring2_rad;
+  G4double ring2_thickn;
+  G4double ring3_rad;
+  G4double ring3_thickn;
+  G4double ring_length;
+  G4double ring_to_ring;
+  G4double ring_bottom_to_ring0_bottom;
+  G4double ring0_length;
+  
+  G4double encapsulation_rad;
+  G4double encapsulation_lenght;
+  G4double encapsulation_thickn;
 
   //S1 AND S2 LENGTHS
   G4double drift_length;
@@ -82,8 +87,10 @@ struct field_cage_parameters {
   G4double anodeBracket_z;
   
   G4double teflon_cage_z;
+  G4double long_ring_z;
   G4double teflon_ring_z;
-  G4double teflon_ring0_z;
+  G4double cathode_ring_z;
+  G4double ring0_z;
   
   G4double pmt_z;
   G4double plateUp_pmt_z;
@@ -94,6 +101,8 @@ struct field_cage_parameters {
   G4double cathode_z; 
   G4double drift_z;  
   G4double el_z;
+  
+  G4double encapsulation_z;
   
 };
 
