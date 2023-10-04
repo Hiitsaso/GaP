@@ -53,6 +53,9 @@ struct field_cage_parameters {
   
   G4double pmt_length;
   
+  G4double TPB_PMTs_rad;
+  G4double TPB_PMTs_length;
+  
   G4double rings_rad;
   G4double rings_thickn;
   G4double rings_length;

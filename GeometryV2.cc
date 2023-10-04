@@ -108,6 +108,9 @@ field_cage_parameters version2_parameters() {
 
   fcp.pmt_length = 43.0  *mm;
   
+  fcp.TPB_PMTs_rad = fcp.pmt_rad;
+  fcp.TPB_PMTs_length = 3 *micrometer;
+  
   fcp.rings_rad    = 165./2  *mm;
   fcp.rings_thickn = 5.      *mm;
   fcp.rings_length = 10.     *mm;
@@ -190,7 +193,7 @@ G4LogicalVolume* get_world(field_cage_parameters const & fcp) {
   return world;
 }
 
-void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {     
+void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp, bool TPBon) {     
   //Upper steel plate at the pmt clad
   n4::tubs("PMTplateUp").r_inner(fcp.plateUp_pmt_rad).r_delta(fcp.plateUp_pmt_thickn).z(fcp.plateUp_pmt_length).place(steel).in(vessel).at_z(fcp.plateUp_pmt_z).check_overlaps().now();
   
@@ -209,6 +212,8 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
   G4LogicalVolume* logic_pmt = new G4LogicalVolume(solid_pmt, aluminum, "PMT");
  
   G4ThreeVector pos_pmt = {0, 0, 0};
+  G4ThreeVector pos_tpb = {0, 0, 0};
+  
   std::vector<std::vector<G4ThreeVector>> all_pos_pmt;
   
   for (G4int i = 0; i < G4int(pmt_PsX.size()); i++) {
@@ -221,6 +226,11 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
     all_pos_pmt.push_back(temp_vector);   
 
     n4::place(logic_pmt).in(vessel).at(pos_pmt).copy_no(i).check_overlaps().now();
+    
+    if (TPBon = true){
+		pos_tpb = {pos_pmt[0], pos_pmt[1], pos_pmt[2] + fcp.pmt_length/2 + fcp.TPB_PMTs_length/2};
+		n4::tubs("TPBinPMTs").r(fcp.TPB_PMTs_rad).z(fcp.TPB_PMTs_length).place(tpb).in(vessel).at(pos_tpb).copy_no(i).check_overlaps().now();
+	}
   }
 
   auto PMtplateBottom1 =   
@@ -296,7 +306,7 @@ G4PVPlacement* GeometryV2() {
   auto vessel       = n4::tubs("GasVessel").r(fcp.vessel_rad).z(fcp.vessel_length).volume(gas);
   n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   
-  place_pmt_holder_in(vessel, fcp);
+  place_pmt_holder_in(vessel, fcp, true);
   place_cage_in(vessel, fcp);
   place_teflon_cage_in(vessel, fcp);
   place_rings_in(vessel, fcp);
