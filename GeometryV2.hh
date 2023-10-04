@@ -62,7 +62,11 @@ struct field_cage_parameters {
   
   G4double teflon_cage_rad;
   G4double teflon_cage_thickn;
-  G4double teflon_cage_lenght;
+  G4double teflon_cage_length;
+  
+  G4double TPB_tefloncage_rad;
+  G4double TPB_tefloncage_length;
+  G4double TPB_tefloncage_thickn;
   
   G4double ring1_rad;
   G4double ring1_thickn;
@@ -76,7 +80,7 @@ struct field_cage_parameters {
   G4double ring0_length;
   
   G4double encapsulation_rad;
-  G4double encapsulation_lenght;
+  G4double encapsulation_length;
   G4double encapsulation_thickn;
 
   //S1 AND S2 LENGTHS
