@@ -139,7 +139,9 @@ field_cage_parameters version2_parameters() {
   fcp.vessel_z = fcp.vessel_length/2 - (163.5*mm + fcp.meshBracket_length);
   
   fcp.cathBracket_z  = -fcp.vessel_z; //From the vessel (and at the origin or the world)
+  fcp.cathode_z      = fcp.cathBracket_z + fcp.meshBracket_length/2; 
   fcp.gateBracket_z  = fcp.cathBracket_z + fcp.meshBracket_length   + fcp.el_length;
+  fcp.gate_z         = fcp.gateBracket_z - fcp.meshBracket_length/2;
   fcp.anodeBracket_z = fcp.gateBracket_z + fcp.meshBracket_length/2 + fcp.drift_length + fcp.anodeBracket_length/2;
   
   fcp.teflon_cage_z   = fcp.gateBracket_z  +  fcp.meshBracket_length/2 + fcp.teflon_cage_lenght/2; 
@@ -153,8 +155,7 @@ field_cage_parameters version2_parameters() {
   fcp.enclosure_pmt_z = fcp.plateUp_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plateUp_pmt_length/2;
   fcp.plate_pmt_z = fcp.enclosure_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plate_pmt_length/2;
   fcp.PMTplateBottom1_pos_z = fcp.pmt_z;
-  
-  fcp.cathode_z = 1*mm; 
+   
   fcp.drift_z = 14.8*mm;  
   fcp.el_z = 14.8*mm;
   
@@ -238,6 +239,9 @@ void place_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {
   //Cathode bracket
   n4::tubs("CathodeBracket").r_inner(fcp.gateBracket_rad).r_delta(fcp.cathBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.cathBracket_z).check_overlaps().now();
   
+  //Cathode mesh
+  n4::tubs("Cathode").r(fcp.mesh_rad).z(fcp.mesh_thickn).place(mesh_mat).in(vessel).at_z(fcp.cathode_z).check_overlaps().now();
+
   //"Cathode" rings (only half of the rings plus the one inside)
   n4::tubs("CathodeRing0").r(      fcp.ring1_rad).z(fcp.ring0_length).place(steel).in(vessel).at_z(fcp.ring0_z).check_overlaps().now();
   n4::tubs("CathodeRing1").r_inner(fcp.ring1_rad).r_delta(fcp.ring1_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
@@ -245,7 +249,10 @@ void place_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {
   n4::tubs("CathodeRing3").r_inner(fcp.ring3_rad).r_delta(fcp.ring3_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
   
   //Gate bracket
-  n4::tubs("gateBracket").r_inner(fcp.gateBracket_rad).r_delta(fcp.gateBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.gateBracket_z).check_overlaps().now();
+  n4::tubs("GateBracket").r_inner(fcp.gateBracket_rad).r_delta(fcp.gateBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.gateBracket_z).check_overlaps().now();
+  
+  //Gate mesh
+  n4::tubs("Gate").r(fcp.mesh_rad).z(fcp.mesh_thickn).place(mesh_mat).in(vessel).at_z(fcp.gate_z).check_overlaps().now();
 
   //Anode bracket
   n4::tubs("AnodeBracket").r_inner(fcp.anodeBracket_rad).r_delta(fcp.anodeBracket_thickn).z(fcp.anodeBracket_length).place(steel).in(vessel).at_z(fcp.anodeBracket_z).check_overlaps().now();

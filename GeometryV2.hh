@@ -83,7 +83,9 @@ struct field_cage_parameters {
   //POSITIONS
   G4double vessel_z; 
   G4double cathBracket_z;
+  G4double cathode_z;
   G4double gateBracket_z;
+  G4double gate_z;
   G4double anodeBracket_z;
   
   G4double teflon_cage_z;
@@ -98,7 +100,6 @@ struct field_cage_parameters {
   G4double plate_pmt_z;
   G4double PMTplateBottom1_pos_z;
   
-  G4double cathode_z; 
   G4double drift_z;  
   G4double el_z;
   
