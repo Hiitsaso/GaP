@@ -60,14 +60,6 @@ struct field_cage_parameters {
   G4double rings_thickn;
   G4double rings_length;
   
-  G4double teflon_cage_rad;
-  G4double teflon_cage_thickn;
-  G4double teflon_cage_length;
-  
-  G4double TPB_tefloncage_rad;
-  G4double TPB_tefloncage_length;
-  G4double TPB_tefloncage_thickn;
-  
   G4double ring1_rad;
   G4double ring1_thickn;
   G4double ring2_rad;
@@ -78,6 +70,14 @@ struct field_cage_parameters {
   G4double ring_to_ring;
   G4double ring_bottom_to_ring0_bottom;
   G4double ring0_length;
+  
+  G4double teflon_cage_rad;
+  G4double teflon_cage_thickn;
+  G4double teflon_cage_length;
+  
+  G4double TPB_tefloncage_rad;
+  G4double TPB_tefloncage_length;
+  G4double TPB_tefloncage_thickn;
   
   G4double encapsulation_rad;
   G4double encapsulation_length;
@@ -96,6 +96,7 @@ struct field_cage_parameters {
   G4double anodeBracket_z;
   
   G4double teflon_cage_z;
+  G4double TPB_tefloncage_z;
   G4double long_ring_z;
   G4double teflon_ring_z;
   G4double cathode_ring_z;
@@ -118,5 +119,6 @@ field_cage_parameters version2_parameters();
 
 G4LogicalVolume* get_world(field_cage_parameters const & fcp);
 G4PVPlacement* GeometryV2();
+G4PVPlacement* GeometryV2_TEST();
 
 #endif

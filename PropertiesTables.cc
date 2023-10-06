@@ -240,7 +240,8 @@ G4MaterialPropertiesTable* TPB_properties() {
   return n4::material_properties()
     .add("RINDEX"               , optPhotRangeE_, 1.67)
     // Assuming no absorption except WLS
-    .add("ABSLENGTH"            , optPhotRangeE_, noAbsLength_) // Wrong argument replaced (see previous line)
+    //~ .add("ABSLENGTH"            , optPhotRangeE_, noAbsLength_) // Wrong argument replaced (see previous line)
+    .add("ABSLENGTH"            , optPhotRangeE_, {1. *m}) // Wrong argument replaced (see previous line)
     //~ .add("WLSABSLENGTH"         , WLS_abs_energy, WLS_absLength)
     //~ .add("WLSCOMPONENT"         , WLS_emi_energy, WLS_emiSpectrum)
     //~ .add("WLSTIMECONSTANT"      , 1.2 * ns) // WLS Delay
