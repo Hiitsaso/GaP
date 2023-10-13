@@ -38,8 +38,8 @@ G4ThreeVector random_generator_inside_S2(std::optional<G4double> fixed_z){
     //~ auto zmax  = fcp.gate_z    - fcp.mesh_thickn/2;
     //~ auto rmax  = fcp.cathBracket_rad + fcp.cathBracket_thickn;
     
-    auto zmin  = fcp.S2_z - fcp.S1_lenght/2; 
-    auto zmax  = fcp.S2_z + fcp.S1_lenght/2; 
+    auto zmin  = fcp.S2_z - fcp.S2_lenght/2; 
+    auto zmax  = fcp.S2_z + fcp.S2_lenght/2; 
     auto rmax  = fcp.S2_rad;
     
     auto r     = G4RandFlat::shoot(0.,   rmax);

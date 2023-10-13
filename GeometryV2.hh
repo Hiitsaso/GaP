@@ -92,11 +92,11 @@ struct field_cage_parameters {
   G4double drift_length;
   G4double el_length;
   
-  G4double S1_rad;
-  G4double S1_lenght;
-  
   G4double S2_rad;
   G4double S2_lenght;
+  
+  G4double S1_rad;
+  G4double S1_lenght;
   
   //POSITIONS
   G4double vessel_z; 
@@ -122,8 +122,8 @@ struct field_cage_parameters {
   G4double drift_z;  
   G4double el_z;
   
-  G4double S1_z;
   G4double S2_z;
+  G4double S1_z;
   
   G4double encapsulation_z;
   

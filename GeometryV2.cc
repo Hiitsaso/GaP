@@ -149,11 +149,11 @@ field_cage_parameters version2_parameters() {
   fcp.drift_length = 87 *mm; // ||   |-|-------------------||
   fcp.el_length    = 10 *mm; // ||---| |                   ||
   
-  fcp.S1_rad    = fcp.cathBracket_rad + fcp.cathBracket_thickn;
-  fcp.S1_lenght = fcp.el_length - 2*fcp.mesh_thickn; //Since the meshes are outside of the cath/gate Brackets
+  fcp.S2_rad    = fcp.cathBracket_rad + fcp.cathBracket_thickn;
+  fcp.S2_lenght = fcp.el_length - 2*fcp.mesh_thickn; //Since the meshes are outside of the cath/gate Brackets
   
-  fcp.S2_rad    = fcp.teflon_cage_rad - fcp.TPB_tefloncage_thickn; 
-  fcp.S2_lenght = fcp.drift_length;  
+  fcp.S1_rad    = fcp.teflon_cage_rad - fcp.TPB_tefloncage_thickn; 
+  fcp.S1_lenght = fcp.drift_length;  
   
   //POSITIONS(faltan por medir)
   fcp.vessel_z = fcp.vessel_length/2 - (163.5*mm + fcp.meshBracket_length);
@@ -182,8 +182,8 @@ field_cage_parameters version2_parameters() {
   fcp.drift_z = fcp.gateBracket_z + fcp.meshBracket_length + fcp.drift_length/2; //not useful
   fcp.el_z    = fcp.cathBracket_z + fcp.meshBracket_length + fcp.el_length/2;    //not useful
   
-  fcp.S1_z      = fcp.cathode_z + fcp.mesh_thickn/2 + fcp.S1_lenght/2; 
-  fcp.S2_z      = fcp.gate_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2;
+  fcp.S2_z      = fcp.cathode_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2; 
+  fcp.S1_z      = fcp.gate_z + fcp.mesh_thickn/2 + fcp.S1_lenght/2;
   
   fcp.encapsulation_z = fcp.ring0_z - (fcp.ring0_length + fcp.encapsulation_length)/2;
 
@@ -395,16 +395,11 @@ void place_rings_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) 
 }
 
 void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp){
-  n4::tubs("S1").r(fcp.S1_rad).z(fcp.S1_lenght).place(gas).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
-	
-  auto S2_logic =   
-  /*      */n4::tubs("S2_full").r(fcp.S2_rad).z(fcp.S2_lenght)
-  .subtract(n4::tubs("CathodeRing_0_tosubtact").r(fcp.ring1_rad).z(fcp.ring0_length)).at_z(fcp.ring0_z - fcp.S2_z) //Relative positions
-  .name("S2").volume(gas);
-  
-  n4::box("TeflonCagetest").x(3*mm).y(3*mm).z(3*mm).place(teflon).in(S2_logic).at({-20.5314*mm, -56.3746*mm, -27.709*mm}).now();
-  
-  n4::place(S2_logic).in(vessel).at_z(fcp.S2_z).check_overlaps().now();
+  n4::tubs("S2").r(fcp.S2_rad).z(fcp.S2_lenght).place(gas).in(vessel).at_z(fcp.S2_z).check_overlaps().now();
+	  
+  /*      */n4::tubs("S1_full").r(fcp.S1_rad).z(fcp.S1_lenght)
+  .subtract(n4::tubs("CathodeRing_0_tosubtact").r(fcp.ring1_rad).z(fcp.ring0_length)).at_z(fcp.ring0_z - fcp.S1_z) //Relative positions
+  .name("S1").place(gas).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
 
 }
 
