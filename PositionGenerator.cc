@@ -7,18 +7,22 @@
 #include <G4SystemOfUnits.hh>
 #include <G4RandomDirection.hh>
 
-G4ThreeVector random_generator_inside_drift(std::optional<G4double> fixed_z){
+G4ThreeVector random_generator_inside_S1(std::optional<G4double> fixed_z){
 	field_cage_parameters fcp = version2_parameters();
-	auto meshBracket_rad_     = 180./2 *mm;
+	    
+    //~ auto zmin  = fcp.drift_z + fcp.mesh_thickn/2;
+    //~ auto zmax  = fcp.teflon_cage_z + fcp.teflon_cage_length/2 - fcp.teflon_cage_thickn - fcp.tpb_coating_thickn;
+    //~ auto rmax  = fcp.teflon_cage_rad - fcp.tpb_coating_thickn;
     
-    auto zmin  = fcp.drift_z - fcp.drift_length/2;
-    auto zmax  = fcp.drift_z + fcp.drift_length/2;
+    auto zmin  = fcp.S1_z - fcp.S1_lenght/2; 
+    auto zmax  = fcp.S1_z + fcp.S1_lenght/2; 
+    auto rmax  = fcp.S1_rad;
     
-    auto r     = G4RandFlat::shoot(   0., meshBracket_rad_);
-    auto angle = G4RandFlat::shoot(   0.,           2*M_PI);
+    auto r     = G4RandFlat::shoot(0.,   rmax);
+    auto angle = G4RandFlat::shoot(0., 2*M_PI);
     auto z     = fixed_z.has_value()
                ? fixed_z.value()
-               : G4RandFlat::shoot( zmin,             zmax);
+               : G4RandFlat::shoot(zmin, zmax);
 
     auto pos_x = r * cos(angle);
     auto pos_y = r * sin(angle);
@@ -27,16 +31,20 @@ G4ThreeVector random_generator_inside_drift(std::optional<G4double> fixed_z){
    return {pos_x, pos_y, pos_z};
 }
 
-G4ThreeVector random_generator_inside_el(std::optional<G4double> fixed_z){    
+G4ThreeVector random_generator_inside_S2(std::optional<G4double> fixed_z){    
 	field_cage_parameters fcp = version2_parameters();
-	auto meshBracket_rad_     = 180./2 *mm;
 	
-    auto zmin  = fcp.el_z - fcp.el_length/2;
-    auto zmax  = fcp.el_z + fcp.el_length/2;
+    //~ auto zmin  = fcp.cathode_z + fcp.mesh_thickn/2;
+    //~ auto zmax  = fcp.gate_z    - fcp.mesh_thickn/2;
+    //~ auto rmax  = fcp.cathBracket_rad + fcp.cathBracket_thickn;
     
-    auto r     = G4RandFlat::shoot(   0., meshBracket_rad_);
-    auto angle = G4RandFlat::shoot(   0.,           2*M_PI);
-    auto z     = G4RandFlat::shoot( zmin,             zmax);
+    auto zmin  = fcp.S2_z - fcp.S1_lenght/2; 
+    auto zmax  = fcp.S2_z + fcp.S1_lenght/2; 
+    auto rmax  = fcp.S2_rad;
+    
+    auto r     = G4RandFlat::shoot(0.,   rmax);
+    auto angle = G4RandFlat::shoot(0., 2*M_PI);
+    auto z     = G4RandFlat::shoot(zmin, zmax);
 
     auto pos_x = r * cos(angle);
     auto pos_y = r * sin(angle);

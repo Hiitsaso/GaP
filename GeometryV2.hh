@@ -82,10 +82,21 @@ struct field_cage_parameters {
   G4double encapsulation_rad;
   G4double encapsulation_length;
   G4double encapsulation_thickn;
+  
+  G4double SiPMs_long;
+  G4double SiPMs_short;
+  G4double SiPMs_thickn;
+  G4double cath_to_SiPMs;
 
   //S1 AND S2 LENGTHS
   G4double drift_length;
   G4double el_length;
+  
+  G4double S1_rad;
+  G4double S1_lenght;
+  
+  G4double S2_rad;
+  G4double S2_lenght;
   
   //POSITIONS
   G4double vessel_z; 
@@ -111,7 +122,12 @@ struct field_cage_parameters {
   G4double drift_z;  
   G4double el_z;
   
+  G4double S1_z;
+  G4double S2_z;
+  
   G4double encapsulation_z;
+  
+  G4double SiPMs_z;
   
 };
 

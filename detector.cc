@@ -41,23 +41,29 @@ bool process_hits_anode(G4Step *step){
 }
 
 bool process_hits(G4Step *step){			
-	const std::string& filename_map = "files_7PMTs/nan.txt";
-	//~ const std::string& filename_map_primaries = "nan.txt";
+	//~ const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_1000000.txt";
+	const std::string& filename_map = "files_OneSiPM/nan.txt";
 	G4Track* track = step -> GetTrack();
 	G4String particleType = track->GetDefinition()->GetParticleName();			
 	G4int hits_check = 0;
 	
 	G4ThreeVector position     = track -> GetVertexPosition();
-	G4ThreeVector position_hit = step  -> GetPostStepPoint() -> GetPosition();
+	G4ThreeVector position_hit = step  -> GetPreStepPoint() -> GetPosition();
+	
+	G4String volume = step -> GetPreStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName();
 	int colWidth = 20;
 	
-	//G4cout << "*************************************  :)  " << particleType << "  (:  *************************************"  << G4endl;   
+	if (position == position_hit && volume == "CathodeRing0"){ //That means that it has been generated inside the CathodeRing0¿?
+	track -> SetTrackStatus(fStopAndKill);
+	G4cout << "*************************************  :)  I'M DEAD  (:  *************************************"  << G4endl; 
+
+    }
 	
 	if (particleType == "opticalphoton"){ 
 	track -> SetTrackStatus(fStopAndKill);
 	
 	hits_check = 1;
-	//G4cout << "*************************************  :)  OUCH  (:  *************************************"  << G4endl; 
+	G4cout << "*************************************  :)  OUCH  (:  *************************************"  << G4endl; 
 				
 	}
 	
