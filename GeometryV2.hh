@@ -86,6 +86,9 @@ struct field_cage_parameters {
   G4double SiPMs_long;
   G4double SiPMs_short;
   G4double SiPMs_thickn;
+  G4double SiPMs_cage_long;
+  G4double SiPMs_cage_short;
+  G4double SiPMs_cage_thickn;
   G4double cath_to_SiPMs;
 
   //S1 AND S2 LENGTHS
