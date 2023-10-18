@@ -149,3 +149,11 @@ G4Material* plastic_with_properties() {
   return plastic;
 }
 
+//////////////////////////////////////////////////////////////////////// OK
+
+G4Material* silicon_with_properties() {
+  auto silicon = n4::material("G4_Si");
+  //~ silicon -> SetMaterialPropertiesTable(plastic_properties()) ;
+  return silicon;
+}
+

@@ -45,6 +45,7 @@ G4Material* gas;
 G4Material* air;
 G4Material* teflon;
 G4Material* plastic;
+G4Material* silicon;
 G4LogicalVolume* world;
 
 
@@ -211,6 +212,7 @@ void ensure_initialized(field_cage_parameters const & fcp) {
   tpb     = TPB_with_properties();
   teflon  = teflon_with_properties();
   plastic = plastic_with_properties();
+  silicon = silicon_with_properties();
   world = n4::box("world").cube(world_size).volume(vacuum);
 }
 
@@ -310,9 +312,7 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
   
     G4double initialPosX = -rad_long/2  + 0.5 * fcp.SiPMs_cage_long  + 0.5 * remainingX;
     G4double initialPosY = -rad_short/2 + 0.5 * fcp.SiPMs_cage_short + 0.5 * remainingY;
-    
-   //~ n4::box("test").x(rad_long).y(rad_long).z(fcp.SiPMs_thickn).place(teflon).in(vessel).at_z(fcp.SiPMs_z).check_overlaps().now();
-   
+       
    auto SiPM_cage_logic = 
    /*      */n4::box("SiPM_cage_full").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_cage_thickn)
   .subtract(n4::box(   "SiPM_surface").x(     fcp.SiPMs_long).y(     fcp.SiPMs_short).z(     fcp.SiPMs_thickn)).at_z((fcp.SiPMs_cage_thickn - fcp.SiPMs_thickn)/2) //Relative position
@@ -326,7 +326,7 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
             G4ThreeVector pos_surf = {posX, posY, fcp.SiPMs_z - fcp.SiPMs_thickn/2};
             
             n4::place(SiPM_cage_logic).in(vessel).at(pos_cage).check_overlaps().now();
-		    n4::box("SiPMs").x(fcp.SiPMs_long).y(fcp.SiPMs_short).z(fcp.SiPMs_thickn).place(plastic).in(vessel).at(pos_surf).check_overlaps().now(); //put silicon material
+		    n4::box("SiPMs").x(fcp.SiPMs_long).y(fcp.SiPMs_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos_surf).check_overlaps().now(); 
         }
     }  
     
