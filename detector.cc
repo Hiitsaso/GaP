@@ -4,6 +4,7 @@
 //#include <G4SystemOfUnits.hh>
 
 #include "detector.hh"
+#include "GeometryV2.hh"
 
 bool process_hits_anode(G4Step *step){			
 	const std::string& filename_map = "Test_anode_vessel_2.txt";
@@ -40,9 +41,11 @@ bool process_hits_anode(G4Step *step){
 	return true;
 }
 
-bool process_hits(G4Step *step){			
-	//~ const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_1000000.txt";
-	const std::string& filename_map = "files_OneSiPM/nan.txt";
+bool process_hits(G4Step *step){	
+    field_cage_parameters fcp = version2_parameters();
+				
+	const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_10000000.txt";
+	//~ const std::string& filename_map = "files_OneSiPM/nan.txt";
 	G4Track* track = step -> GetTrack();
 	G4String particleType = track->GetDefinition()->GetParticleName();			
 	G4int hits_check = 0;
@@ -50,33 +53,74 @@ bool process_hits(G4Step *step){
 	G4ThreeVector position     = track -> GetVertexPosition();
 	G4ThreeVector position_hit = step  -> GetPreStepPoint() -> GetPosition();
 	
-	G4String volume = step -> GetPreStepPoint() -> GetTouchableHandle() -> GetVolume() -> GetLogicalVolume() -> GetName();
 	int colWidth = 20;
 	
-	if (position == position_hit && volume == "CathodeRing0"){ //That means that it has been generated inside the CathodeRing0¿?
-	track -> SetTrackStatus(fStopAndKill);
-	G4cout << "*************************************  :)  I'M DEAD  (:  *************************************"  << G4endl; 
-
-    }
+	auto zmin    = fcp.ring0_z - fcp.ring0_length/2; 
+    auto zmax    = fcp.ring0_z + fcp.ring0_length/2; 
+    auto xy_lim  = fcp.ring1_rad;
+    
+	//~ if (position.x() >= xy_lim && position.x() <= -xy_lim  &&  position.y() >= xy_lim && position.y() <= -xy_lim  && position.z() >= zmax && position.z() <= zmin){ 
+	//no se como conseguir que no tenga en cuenta las que se generan ene sa parte random.
+    	
+		if (particleType == "opticalphoton"){ 
+		track -> SetTrackStatus(fStopAndKill);
 	
-	if (particleType == "opticalphoton"){ 
-	track -> SetTrackStatus(fStopAndKill);
-	
-	hits_check = 1;
-	G4cout << "*************************************  :)  OUCH  (:  *************************************"  << G4endl; 
+		hits_check = 1;
+		//~ G4cout << "*************************************  :)  OUCH  (:  *************************************"  << G4endl; 
 				
-	}
+		}
 	
-	std::ofstream file1(filename_map, std::ios::app);
-	file1 << std::left << std::setw(colWidth) << position.x();
-	file1 << std::left << std::setw(colWidth) << position.y();
-	file1 << std::left << std::setw(colWidth) << position.z();
-	file1 << std::left << std::setw(colWidth) << position_hit.x();
-	file1 << std::left << std::setw(colWidth) << position_hit.y();
-	file1 << std::left << std::setw(colWidth) << position_hit.z();
-	file1 << std::left << std::setw(colWidth) << hits_check;
-	file1 << std::endl;
-	file1.close();
+		std::ofstream file1(filename_map, std::ios::app);
+		file1 << std::left << std::setw(colWidth) << position.x(); 
+		file1 << std::left << std::setw(colWidth) << position.y();
+		file1 << std::left << std::setw(colWidth) << position.z();
+		file1 << std::left << std::setw(colWidth) << position_hit.x();
+		file1 << std::left << std::setw(colWidth) << position_hit.y();
+		file1 << std::left << std::setw(colWidth) << position_hit.z();
+		file1 << std::left << std::setw(colWidth) << hits_check;
+		file1 << std::endl;
+		file1.close();
+	//~ }
+	
+	return true;
+}
+
+
+bool process_hits_genratorCHECK(G4Step *step){	
+    field_cage_parameters fcp = version2_parameters();
+				
+	const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_10000000_generatorCHECK.txt";
+	G4Track* track = step -> GetTrack();
+	G4String particleType = track->GetDefinition()->GetParticleName();			
+	G4int hits_check = 0;
+	
+	G4ThreeVector position     = track -> GetVertexPosition();
+	G4ThreeVector position_hit = step  -> GetPreStepPoint() -> GetPosition();
+	
+	int colWidth = 20;
+	
+	auto zmin    = fcp.ring0_z - fcp.ring0_length/2; 
+    auto zmax    = fcp.ring0_z + fcp.ring0_length/2; 
+    auto xy_lim  = fcp.ring1_rad;
+    	
+		if (position == position_hit){ 
+		//~ track -> SetTrackStatus(fStopAndKill);
+	
+		hits_check = 1;
+		//~ G4cout << "*************************************  :)  OUCH  (:  *************************************"  << G4endl; 
+				
+		}
+	
+		std::ofstream file1(filename_map, std::ios::app);
+		file1 << std::left << std::setw(colWidth) << position.x(); 
+		file1 << std::left << std::setw(colWidth) << position.y();
+		file1 << std::left << std::setw(colWidth) << position.z();
+		file1 << std::left << std::setw(colWidth) << position_hit.x();
+		file1 << std::left << std::setw(colWidth) << position_hit.y();
+		file1 << std::left << std::setw(colWidth) << position_hit.z();
+		file1 << std::left << std::setw(colWidth) << hits_check;
+		file1 << std::endl;
+		file1.close();
 	
 	return true;
 }

@@ -395,11 +395,19 @@ void place_rings_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) 
 }
 
 void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp){
+  //S2 zone
   n4::tubs("S2").r(fcp.S2_rad).z(fcp.S2_lenght).place(gas).in(vessel).at_z(fcp.S2_z).check_overlaps().now();
-	  
+	
+  //S1 zone
+  auto S1_logic = 	  
   /*      */n4::tubs("S1_full").r(fcp.S1_rad).z(fcp.S1_lenght)
   .subtract(n4::tubs("CathodeRing_0_tosubtact").r(fcp.ring1_rad).z(fcp.ring0_length)).at_z(fcp.ring0_z - fcp.S1_z) //Relative positions
-  .name("S1").place(gas).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
+  .name("S1").volume(gas);
+  
+  auto sensitive_detector_2 = new n4::sensitive_detector("S1Detector", process_hits_genratorCHECK);
+  S1_logic -> SetSensitiveDetector(sensitive_detector_2);
+   
+  n4::place(S1_logic).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
 
 }
 
