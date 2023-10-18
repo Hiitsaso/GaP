@@ -27,5 +27,6 @@ G4MaterialPropertiesTable* FakeDielectric_properties(G4double pressure,
 
 G4MaterialPropertiesTable*    teflon_properties();
 G4MaterialPropertiesTable*    air_properties();
+G4MaterialPropertiesTable*    silicon_properties();
 
 #endif

@@ -372,4 +372,10 @@ G4MaterialPropertiesTable* air_properties(){
 		.add("RINDEX", OPTPHOT_ENERGY_RANGE, {1, 1})
         .done();
 }
+//////////////////////////////////////////////////////////////////////// OK
+G4MaterialPropertiesTable* silicon_properties(){ 
+	return n4::material_properties()
+		.add("RINDEX", {2.9*eV, 9.7*eV}, {5.34, 1.22}) //"extrapolado"
+		.done(); 
+}
 
