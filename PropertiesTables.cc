@@ -358,7 +358,7 @@ G4MaterialPropertiesTable* teflon_properties(){
     const vecd OPTPHOT_ENERGY_RANGE{1*eV, 10*eV};
     const G4double noAbsLength_   = 1.e8  * m;
 	return n4::material_properties()
-		.add("RINDEX", OPTPHOT_ENERGY_RANGE, {1.35, 1.35})
+		.add("RINDEX", {128., 157., 172.2, 185.1, 248.}, {1.45, 1.417, 1.375, 1.357, 1.325})
         .add("ABSLENGTH", OPTPHOT_ENERGY_RANGE, noAbsLength_)
         .done();
 }
