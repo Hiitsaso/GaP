@@ -143,11 +143,15 @@ field_cage_parameters version2_parameters() {
   
   fcp.SiPMs_long         = 6.   *mm; 
   fcp.SiPMs_short        = 6.   *mm; 
-  fcp.SiPMs_thickn       = 0.5  *mm; //¿?
-  fcp.SiPMs_cage_long    = 10.1 *mm; 
-  fcp.SiPMs_cage_short   = 8.9  *mm; 
+  fcp.SiPMs_thickn       = 2.   *mm; //¿?
+  fcp.SiPMs_cage_long    = 15.  *mm; 
+  fcp.SiPMs_cage_short   = 15.  *mm; 
   fcp.SiPMs_cage_thickn  = 2.   *mm; 
-  fcp.cath_to_SiPMs      = 3.   *mm; 
+  fcp.cath_to_SiPMs      = 5.   *mm; 
+  
+  fcp.SiPM_between_long  = 0. *mm;
+  fcp.SiPM_between_short = 0. *mm;
+  fcp.SiPM_number        = 10;
   
   //S1 AND S2 LENGTHS
   fcp.drift_length = 87 *mm; // ||   |-|-------------------||
@@ -298,39 +302,43 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
   .subtract(solid_pmt).at(all_pos_pmt[6][0]) 
   .name("PMTplateBottom1").place(steel).in(vessel).at_z(fcp.PMTplateBottom1_pos_z).check_overlaps().now();
   
-  if (detector == "SiPM"){
-    G4double rad_long  = 2*fcp.plateBottom_pmt_rad; 
-    G4double rad_short = 2*fcp.plateBottom_pmt_rad;
+  if (detector == "SiPM"){   
+    G4int N = fcp.SiPM_number;
+    auto max = 0.;
   
-    G4int numX = static_cast<G4int>(  rad_long/fcp.SiPMs_cage_long);
-    G4int numY = static_cast<G4int>(rad_short/fcp.SiPMs_cage_short);
-    G4double spacingX =  rad_long/ numX;
-    G4double spacingY = rad_short/ numY;
+    if (N%2 == 0){ 
+	 
+	  N = fcp.SiPM_number - 1;  //par
+	  G4int lim = (2*fcp.SiPM_number - 5)/4;
   
-    G4double remainingX = rad_long  - numX * fcp.SiPMs_cage_long;
-    G4double remainingY = rad_short - numY * fcp.SiPMs_cage_short;
-  
-    G4double initialPosX = -rad_long/2  + 0.5 * fcp.SiPMs_cage_long  + 0.5 * remainingX;
-    G4double initialPosY = -rad_short/2 + 0.5 * fcp.SiPMs_cage_short + 0.5 * remainingY;
-       
-   auto SiPM_cage_logic = 
-   /*      */n4::box("SiPM_cage_full").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_cage_thickn)
-  .subtract(n4::box(   "SiPM_surface").x(     fcp.SiPMs_long).y(     fcp.SiPMs_short).z(     fcp.SiPMs_thickn)).at_z((fcp.SiPMs_cage_thickn - fcp.SiPMs_thickn)/2) //Relative position
-  .name("SiPM_cage").volume(plastic);
-
-    for (G4int i = 0; i < numX; ++i) {
-        for (G4int j = 0; j < numY; ++j) {
-            G4double posX = initialPosX + i *  fcp.SiPMs_cage_long;
-            G4double posY = initialPosY + j * fcp.SiPMs_cage_short;
-            G4ThreeVector pos_cage = {posX, posY, fcp.SiPMs_z - fcp.SiPMs_cage_thickn/2};
-            G4ThreeVector pos_surf = {posX, posY, fcp.SiPMs_z - fcp.SiPMs_thickn/2};
-            
-            n4::place(SiPM_cage_logic).in(vessel).at(pos_cage).check_overlaps().now();
-		    n4::box("SiPMs").x(fcp.SiPMs_long).y(fcp.SiPMs_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos_surf).check_overlaps().now(); 
-        }
+      for (G4int i = -lim/2; i < lim/2 + 1; ++i) {
+		G4double posX = (fcp.SiPMs_cage_long + fcp.SiPM_between_long)*fcp.SiPM_number/2;  //fijo
+		G4double posY = fcp.SiPMs_cage_short*i + fcp.SiPM_between_short*i;
+		G4ThreeVector pos  = {posX, posY, fcp.SiPMs_z};
+		G4ThreeVector pos_ = {-posX, posY, fcp.SiPMs_z};
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos).check_overlaps().now();
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos_).check_overlaps().now();
+	  }
+      for (G4int j = -lim/2; j < lim/2 + 1; ++j) {
+		G4double posY = (fcp.SiPMs_cage_short + fcp.SiPM_between_short)*fcp.SiPM_number/2;  //fijo
+		G4double posX =  fcp.SiPMs_cage_long*j + fcp.SiPM_between_long*j;
+		G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
+		G4ThreeVector pos_ = {posX, -posY, fcp.SiPMs_z};
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos).check_overlaps().now();
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos_).check_overlaps().now();
+	  }
     }  
     
-    //~ G4LogicalVolume* logic_OneSiPM = n4::box("OneSiPM").x(rad_long).y(rad_short).z(fcp.SiPMs_thickn).volume(teflon);
+    for (G4int i = -N/2; i < N/2 + 1; ++i) {
+	  G4double posX = fcp.SiPMs_cage_long*i + fcp.SiPM_between_long*i;
+      for (G4int j = -N/2; j < N/2 + 1; ++j) {
+        G4double posY = fcp.SiPMs_cage_short*j + fcp.SiPM_between_short*j;
+        G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
+		n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos).check_overlaps().now();
+      }
+   } 
+   
+    //~ G4LogicalVolume* logic_OneSiPM = n4::tubs("OneSiPM").r(rad_long).z(fcp.SiPMs_thickn).volume(silicon);
     //~ auto sensitive_detector = new n4::sensitive_detector("OneDetector", process_hits);
     //~ logic_OneSiPM -> SetSensitiveDetector(sensitive_detector);
     //~ n4::place(logic_OneSiPM).in(vessel).at_z(fcp.SiPMs_z).check_overlaps().now();
@@ -414,8 +422,8 @@ void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & f
   .subtract(n4::tubs("CathodeRing_0_tosubtact").r(fcp.ring1_rad).z(fcp.ring0_length)).at_z(fcp.ring0_z - fcp.S1_z) //Relative positions
   .name("S1").volume(gas);
   
-  auto sensitive_detector_2 = new n4::sensitive_detector("S1Detector", process_hits_genratorCHECK);
-  S1_logic -> SetSensitiveDetector(sensitive_detector_2);
+  //~ auto sensitive_detector_2 = new n4::sensitive_detector("S1Detector", process_hits_genratorCHECK);
+  //~ S1_logic -> SetSensitiveDetector(sensitive_detector_2);
    
   n4::place(S1_logic).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
 
@@ -433,9 +441,10 @@ G4PVPlacement* GeometryV2() {
   auto vessel           = n4::tubs("GasVessel").r(fcp.vessel_rad).z(fcp.vessel_length).volume(gas);
   auto vessel_placement = n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   
-  place_pmt_holder_in(vessel, fcp, true, false, "SiPM"); //SiPM or PMT
+  //bool1 = TPBon ; bool2 = OpticalSurfaceON
+  place_pmt_holder_in(vessel, fcp, false, false, "SiPM"); //SiPM or PMT
   place_cage_in(vessel, fcp);
-  place_teflon_cage_in(vessel, vessel_placement, fcp, true, true);
+  place_teflon_cage_in(vessel, vessel_placement, fcp, false, false);
   place_rings_in(vessel, fcp);
   //~ place_encapsulation_in(vessel, fcp);
   place_S1_and_S2_in(vessel, fcp);
@@ -446,33 +455,41 @@ G4PVPlacement* GeometryV2() {
 G4PVPlacement* GeometryV2_TEST() {
   field_cage_parameters fcp = version2_parameters();
   ensure_initialized(fcp);
-      
-  //~ G4PVPlacement* test1 = n4::tubs("test1").r(16*cm).z(0.3*m).place(aluminum).in(world).at_z(0).check_overlaps().now(); 
-  //~ G4PVPlacement* test2 = n4::tubs("test2").r_inner(16*cm).r_delta(6*cm).z(0.3*m).place(aluminum).in(world).at_z(0).check_overlaps().now(); 
-  //~ place_optical_surface_between(test1, test2, "testsurface", 0.98);
   
-  G4double rad_long  = fcp.plate_pmt_rad;
-  G4double rad_short = fcp.plate_pmt_rad;
+  G4int N = fcp.SiPM_number;
+    auto max = 0.;
   
-  G4int numX = static_cast<G4int>(  rad_long/fcp.SiPMs_long);
-  G4int numY = static_cast<G4int>(rad_short/fcp.SiPMs_short);
-  G4double spacingX =  rad_long/ numX;
-  G4double spacingY = rad_short/ numY;
+    if (N%2 == 0){ 
+	 
+	  N = fcp.SiPM_number - 1;  //par
+	  G4int lim = (2*fcp.SiPM_number - 5)/4;
   
-  G4double remainingX =   rad_long - numX * fcp.SiPMs_long;
-  G4double remainingY = rad_short - numY * fcp.SiPMs_short;
-  
-  G4double initialPosX =   -rad_long/2 + 0.5 * fcp.SiPMs_long + 0.5 * remainingX;
-  G4double initialPosY = -rad_short/2 + 0.5 * fcp.SiPMs_short + 0.5 * remainingY;
-
-    for (G4int i = 0; i < numX; ++i) {
-        for (G4int j = 0; j < numY; ++j) {
-            G4double posX = initialPosX + i *  fcp.SiPMs_long;
-            G4double posY = initialPosY + j * fcp.SiPMs_short;
-            G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
-		    n4::box("test").x(fcp.SiPMs_long).y(fcp.SiPMs_short).z(fcp.SiPMs_thickn).place(teflon).in(world).at(pos).check_overlaps().now();
-        }
+      for (G4int i = -lim/2; i < lim/2 + 1; ++i) {
+		G4double posX = (fcp.SiPMs_cage_long + fcp.SiPM_between_long)*fcp.SiPM_number/2;  //fijo
+		G4double posY = fcp.SiPMs_cage_short*i + fcp.SiPM_between_short*i;
+		G4ThreeVector pos  = {posX, posY, fcp.SiPMs_z};
+		G4ThreeVector pos_ = {-posX, posY, fcp.SiPMs_z};
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(world).at(pos).check_overlaps().now();
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(world).at(pos_).check_overlaps().now();
+	  }
+      for (G4int j = -lim/2; j < lim/2 + 1; ++j) {
+		G4double posY = (fcp.SiPMs_cage_short + fcp.SiPM_between_short)*fcp.SiPM_number/2;  //fijo
+		G4double posX =  fcp.SiPMs_cage_long*j + fcp.SiPM_between_long*j;
+		G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
+		G4ThreeVector pos_ = {posX, -posY, fcp.SiPMs_z};
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(world).at(pos).check_overlaps().now();
+	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(world).at(pos_).check_overlaps().now();
+	  }
     }  
+    
+    for (G4int i = -N/2; i < N/2 + 1; ++i) {
+	  G4double posX = fcp.SiPMs_cage_long*i + fcp.SiPM_between_long*i;
+      for (G4int j = -N/2; j < N/2 + 1; ++j) {
+        G4double posY = fcp.SiPMs_cage_short*j + fcp.SiPM_between_short*j;
+        G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
+		n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(world).at(pos).check_overlaps().now();
+      }
+   } 
   return n4::place(world).now();
 }
 
