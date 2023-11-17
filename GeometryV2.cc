@@ -138,9 +138,8 @@ field_cage_parameters version2_parameters() {
   fcp.TPB_tefloncage_thickn = 3 *mm;
   fcp.TPB_tefloncage_rad    = fcp.teflon_cage_rad;
   
-  fcp.encapsulation_rad    = 30./2  *mm;
-  fcp.encapsulation_length = 2.54   *mm; 
-  fcp.encapsulation_thickn = 2.6    *mm; 
+  fcp.encapsulation_rad    = 38./2  *mm;
+  fcp.encapsulation_length = 2   *mm; 
   
   fcp.SiPMs_long         = 6.   *mm; 
   fcp.SiPMs_short        = 6.   *mm; 
@@ -200,7 +199,7 @@ field_cage_parameters version2_parameters() {
   fcp.S2_z    = fcp.cathode_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2; 
   fcp.S1_z    = fcp.gate_z + fcp.mesh_thickn/2 + fcp.S1_lenght/2;
   
-  fcp.encapsulation_z = fcp.ring0_z - (fcp.ring0_length + fcp.encapsulation_length)/2;
+  fcp.encapsulation_z = fcp.ring0_z + (fcp.ring0_length + fcp.encapsulation_length)/2;
   
   fcp.Pb_box_z = fcp.vessel_z + fcp.vessel_length/2 - fcp.Pb_box_rel_pos - fcp.Pb_box_lengt_xy/2;
 
@@ -438,7 +437,6 @@ void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & f
   
   //~ auto sensitive_detector_2 = new n4::sensitive_detector("S1Detector", process_hits_genratorCHECK);
   //~ S1_logic -> SetSensitiveDetector(sensitive_detector_2);
-  
    
   n4::place(S1_logic).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
 }
@@ -463,10 +461,10 @@ G4PVPlacement* GeometryV2() {
   place_pmt_holder_in(vessel, fcp, false, false, "PMT"); //SiPM or PMT
   place_cage_in(vessel, fcp);
   place_teflon_cage_in(vessel, vessel_placement, fcp, false, false);
-  place_rings_in(vessel, fcp);
-  //~ place_encapsulation_in(vessel, fcp);
-  place_S1_and_S2_in(vessel, fcp);
-  place_Pb_box_in(vessel, fcp);
+  //place_rings_in(vessel, fcp);
+  place_encapsulation_in(vessel, fcp);
+  //place_S1_and_S2_in(vessel, fcp);
+  //place_Pb_box_in(vessel, fcp);
   
   return n4::place(world).now();
 }
