@@ -151,7 +151,7 @@ field_cage_parameters version2_parameters() {
   
   fcp.SiPM_between_long  = 0. *mm;
   fcp.SiPM_between_short = 0. *mm;
-  fcp.SiPM_number        = 10;
+  fcp.SiPM_number        = 5;
   
   //S1 AND S2 LENGTHS
   fcp.drift_length = 87 *mm; // ||   |-|-------------------||
@@ -179,10 +179,11 @@ field_cage_parameters version2_parameters() {
   fcp.cathode_ring_z   = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2 + fcp.ring_length/4; 
   fcp.ring0_z          = fcp.long_ring_z    + fcp.rings_length/2  -  fcp.ring_bottom_to_ring0_bottom - fcp.ring0_length/2; 
   
-  fcp.pmt_z    = - (12.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathBracket_z; 
-  fcp.plateUp_pmt_z = - ( 150.5*mm + fcp.meshBracket_length/2 + fcp.plateUp_pmt_length/2) + fcp.cathBracket_z;
-  fcp.enclosure_pmt_z = fcp.plateUp_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plateUp_pmt_length/2;
-  fcp.plate_pmt_z = fcp.enclosure_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plate_pmt_length/2;
+  //~ fcp.pmt_z             = - (12.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathBracket_z; //old position of the PMTs
+  fcp.pmt_z                 = - (2.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathBracket_z;  //new position of the PMTs (2mm from the anode)
+  fcp.plateUp_pmt_z         = - ( 150.5*mm + fcp.meshBracket_length/2 + fcp.plateUp_pmt_length/2) + fcp.cathBracket_z;
+  fcp.enclosure_pmt_z       = fcp.plateUp_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plateUp_pmt_length/2;
+  fcp.plate_pmt_z           = fcp.enclosure_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plate_pmt_length/2;
   fcp.PMTplateBottom1_pos_z = fcp.pmt_z;
   
   fcp.SiPMs_z = fcp.cathBracket_z - fcp.meshBracket_length/2 - fcp.cath_to_SiPMs;
@@ -305,43 +306,47 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
   if (detector == "SiPM"){   
     G4int N = fcp.SiPM_number;
     auto max = 0.;
-  
-    if (N%2 == 0){ 
-	 
-	  N = fcp.SiPM_number - 1;  //par
-	  G4int lim = (2*fcp.SiPM_number - 5)/4;
-  
-      for (G4int i = -lim/2; i < lim/2 + 1; ++i) {
-		G4double posX = (fcp.SiPMs_cage_long + fcp.SiPM_between_long)*fcp.SiPM_number/2;  //fijo
-		G4double posY = fcp.SiPMs_cage_short*i + fcp.SiPM_between_short*i;
-		G4ThreeVector pos  = {posX, posY, fcp.SiPMs_z};
-		G4ThreeVector pos_ = {-posX, posY, fcp.SiPMs_z};
-	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos).check_overlaps().now();
-	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos_).check_overlaps().now();
-	  }
-      for (G4int j = -lim/2; j < lim/2 + 1; ++j) {
-		G4double posY = (fcp.SiPMs_cage_short + fcp.SiPM_between_short)*fcp.SiPM_number/2;  //fijo
-		G4double posX =  fcp.SiPMs_cage_long*j + fcp.SiPM_between_long*j;
-		G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
-		G4ThreeVector pos_ = {posX, -posY, fcp.SiPMs_z};
-	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos).check_overlaps().now();
-	    n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos_).check_overlaps().now();
-	  }
-    }  
     
-    for (G4int i = -N/2; i < N/2 + 1; ++i) {
-	  G4double posX = fcp.SiPMs_cage_long*i + fcp.SiPM_between_long*i;
-      for (G4int j = -N/2; j < N/2 + 1; ++j) {
-        G4double posY = fcp.SiPMs_cage_short*j + fcp.SiPM_between_short*j;
-        G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
-		n4::box("test").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).place(silicon).in(vessel).at(pos).check_overlaps().now();
-      }
-   } 
+    //~ G4LogicalVolume* logic_4SiPM = n4::box("4SiPM").x(fcp.SiPMs_cage_long).y(fcp.SiPMs_cage_short).z(fcp.SiPMs_thickn).volume(silicon);
+	//~ auto sensitive_detector = new n4::sensitive_detector("4Detector", process_hits);
+    //~ logic_4SiPM -> SetSensitiveDetector(sensitive_detector);
+  
+    //~ if (N%2 == 0){ 
+	 
+	  //~ N = fcp.SiPM_number - 1;  //par
+	  //~ G4int lim = (2*fcp.SiPM_number - 5)/4;
+  
+      //~ for (G4int i = -lim/2; i < lim/2 + 1; ++i) {
+		//~ G4double posX = (fcp.SiPMs_cage_long + fcp.SiPM_between_long)*fcp.SiPM_number/2;  //fijo
+		//~ G4double posY = fcp.SiPMs_cage_short*i + fcp.SiPM_between_short*i;
+		//~ G4ThreeVector pos  = {posX, posY, fcp.SiPMs_z};
+		//~ G4ThreeVector pos_ = {-posX, posY, fcp.SiPMs_z};
+	    //~ n4::place(logic_4SiPM).in(vessel).at(pos).check_overlaps().now();
+	    //~ n4::place(logic_4SiPM).in(vessel).at(pos_).check_overlaps().now();
+	  //~ }
+      //~ for (G4int j = -lim/2; j < lim/2 + 1; ++j) {
+		//~ G4double posY = (fcp.SiPMs_cage_short + fcp.SiPM_between_short)*fcp.SiPM_number/2;  //fijo
+		//~ G4double posX =  fcp.SiPMs_cage_long*j + fcp.SiPM_between_long*j;
+		//~ G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
+		//~ G4ThreeVector pos_ = {posX, -posY, fcp.SiPMs_z};
+	    //~ n4::place(logic_4SiPM).in(vessel).at(pos).check_overlaps().now();
+	    //~ n4::place(logic_4SiPM).in(vessel).at(pos_).check_overlaps().now();
+	  //~ }
+    //~ }  
+    
+    //~ for (G4int i = -N/2; i < N/2 + 1; ++i) {
+	  //~ G4double posX = fcp.SiPMs_cage_long*i + fcp.SiPM_between_long*i;
+      //~ for (G4int j = -N/2; j < N/2 + 1; ++j) {
+        //~ G4double posY = fcp.SiPMs_cage_short*j + fcp.SiPM_between_short*j;
+        //~ G4ThreeVector pos = {posX, posY, fcp.SiPMs_z};
+		//~ n4::place(logic_4SiPM).in(vessel).at(pos).check_overlaps().now();
+      //~ }
+   //~ } 
    
-    //~ G4LogicalVolume* logic_OneSiPM = n4::tubs("OneSiPM").r(rad_long).z(fcp.SiPMs_thickn).volume(silicon);
-    //~ auto sensitive_detector = new n4::sensitive_detector("OneDetector", process_hits);
-    //~ logic_OneSiPM -> SetSensitiveDetector(sensitive_detector);
-    //~ n4::place(logic_OneSiPM).in(vessel).at_z(fcp.SiPMs_z).check_overlaps().now();
+    G4LogicalVolume* logic_OneSiPM = n4::box("OneSiPM").xy(2*fcp.mesh_rad).z(fcp.SiPMs_thickn).volume(silicon);
+    auto sensitive_detector = new n4::sensitive_detector("OneDetector", process_hits);
+    logic_OneSiPM -> SetSensitiveDetector(sensitive_detector);
+    n4::place(logic_OneSiPM).in(vessel).at_z(fcp.SiPMs_z).check_overlaps().now();
     
   }
 }
@@ -424,6 +429,7 @@ void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & f
   
   //~ auto sensitive_detector_2 = new n4::sensitive_detector("S1Detector", process_hits_genratorCHECK);
   //~ S1_logic -> SetSensitiveDetector(sensitive_detector_2);
+  
    
   n4::place(S1_logic).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
 
@@ -442,7 +448,7 @@ G4PVPlacement* GeometryV2() {
   auto vessel_placement = n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   
   //bool1 = TPBon ; bool2 = OpticalSurfaceON
-  place_pmt_holder_in(vessel, fcp, false, false, "SiPM"); //SiPM or PMT
+  place_pmt_holder_in(vessel, fcp, false, false, "PMT"); //SiPM or PMT
   place_cage_in(vessel, fcp);
   place_teflon_cage_in(vessel, vessel_placement, fcp, false, false);
   place_rings_in(vessel, fcp);

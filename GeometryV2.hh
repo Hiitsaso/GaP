@@ -93,7 +93,7 @@ struct field_cage_parameters {
   
   G4double SiPM_between_long;
   G4double SiPM_between_short;
-  G4double SiPM_number;
+  G4int    SiPM_number;
   
 
   //S1 AND S2 LENGTHS
