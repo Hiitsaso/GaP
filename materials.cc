@@ -156,4 +156,10 @@ G4Material* silicon_with_properties() {
   silicon -> SetMaterialPropertiesTable(silicon_properties()) ;
   return silicon;
 }
+//////////////////////////////////////////////////////////////////////// OK
 
+G4Material* Pb_with_properties() {
+  auto Pb = n4::material("G4_Pb");
+  //~ Pb -> SetMaterialPropertiesTable(Pb_properties()) ;
+  return Pb;
+}

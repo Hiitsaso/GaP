@@ -46,6 +46,7 @@ G4Material* air;
 G4Material* teflon;
 G4Material* plastic;
 G4Material* silicon;
+G4Material* Pb;
 G4LogicalVolume* world;
 
 
@@ -153,6 +154,10 @@ field_cage_parameters version2_parameters() {
   fcp.SiPM_between_short = 0. *mm;
   fcp.SiPM_number        = 5;
   
+  fcp.Pb_box_lengt_xy = 100 *mm;
+  fcp.Pb_box_lengt_z  = 50  *mm;
+  fcp.Pb_box_rel_pos  = 2   *cm;
+  
   //S1 AND S2 LENGTHS
   fcp.drift_length = 87 *mm; // ||   |-|-------------------||
   fcp.el_length    = 10 *mm; // ||---| |                   ||
@@ -162,6 +167,7 @@ field_cage_parameters version2_parameters() {
   
   fcp.S1_rad    = fcp.teflon_cage_rad - fcp.TPB_tefloncage_thickn; 
   fcp.S1_lenght = fcp.drift_length;  
+  
   
   //POSITIONS(faltan por medir)
   fcp.vessel_z = fcp.vessel_length/2 - (163.5*mm + fcp.meshBracket_length);
@@ -191,10 +197,12 @@ field_cage_parameters version2_parameters() {
   fcp.drift_z = fcp.gateBracket_z + fcp.meshBracket_length + fcp.drift_length/2; //not useful
   fcp.el_z    = fcp.cathBracket_z + fcp.meshBracket_length + fcp.el_length/2;    //not useful
   
-  fcp.S2_z      = fcp.cathode_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2; 
-  fcp.S1_z      = fcp.gate_z + fcp.mesh_thickn/2 + fcp.S1_lenght/2;
+  fcp.S2_z    = fcp.cathode_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2; 
+  fcp.S1_z    = fcp.gate_z + fcp.mesh_thickn/2 + fcp.S1_lenght/2;
   
   fcp.encapsulation_z = fcp.ring0_z - (fcp.ring0_length + fcp.encapsulation_length)/2;
+  
+  fcp.Pb_box_z = fcp.vessel_z + fcp.vessel_length/2 - fcp.Pb_box_rel_pos - fcp.Pb_box_lengt_xy/2;
 
   return fcp;
 }
@@ -218,6 +226,7 @@ void ensure_initialized(field_cage_parameters const & fcp) {
   teflon  = teflon_with_properties();
   plastic = plastic_with_properties();
   silicon = silicon_with_properties();
+  Pb      = Pb_with_properties();
   world = n4::box("world").cube(world_size).volume(vacuum);
 }
 
@@ -432,7 +441,10 @@ void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & f
   
    
   n4::place(S1_logic).in(vessel).at_z(fcp.S1_z).check_overlaps().now();
+}
 
+void place_Pb_box_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp){
+  n4::box("PbBox").xy(fcp.Pb_box_lengt_xy).z(fcp.Pb_box_lengt_z).place(Pb).in(vessel).at_z(fcp.Pb_box_z).check_overlaps().now();
 }
 
 G4PVPlacement* GeometryV2() {
@@ -454,6 +466,7 @@ G4PVPlacement* GeometryV2() {
   place_rings_in(vessel, fcp);
   //~ place_encapsulation_in(vessel, fcp);
   place_S1_and_S2_in(vessel, fcp);
+  place_Pb_box_in(vessel, fcp);
   
   return n4::place(world).now();
 }

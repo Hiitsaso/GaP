@@ -27,5 +27,6 @@ G4Material* air_with_properties();
 G4Material* teflon_with_properties();
 G4Material* plastic_with_properties();
 G4Material* silicon_with_properties();
+G4Material* Pb_with_properties();
 
 #endif

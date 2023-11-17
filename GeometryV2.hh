@@ -95,6 +95,11 @@ struct field_cage_parameters {
   G4double SiPM_between_short;
   G4int    SiPM_number;
   
+  G4double Pb_box_lengt_xy;
+  G4double Pb_box_lengt_z;
+  G4double Pb_box_rel_pos;
+  G4double Pb_box_z;
+  
 
   //S1 AND S2 LENGTHS
   G4double drift_length;
