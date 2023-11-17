@@ -247,7 +247,7 @@ const std::string filename_event_2 = "nan.txt";
     auto event_counter = [& eventCounter](G4Event const*) {
 		eventCounter++;
 		if (eventCounter % 10000 == 0) {
-			G4cout << "*************************************  :)  " << eventCounter << "  (:  *************************************"  << G4endl;
+			G4cout << "***************  :)  " << eventCounter << "  (:  ***************"  << G4endl;
          }
     } ;
     
@@ -389,8 +389,9 @@ const std::string filename_event_2 = "nan.txt";
 	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
 	G4String particleDefinition = "opticalphoton";
 	generic_messenger -> DeclareProperty("particleDefinition", particleDefinition,"Type of the generated particle");
-	//~ G4double particleEnergy = 9.693*eV; //(128nm) 
-	G4double particleEnergy = 2.954*eV;  //(420nm)
+	G4double particleEnergy = 9.693*eV; //(128nm for Ar) 
+	//~ G4double particleEnergy = 2.954*eV;  //(420nm for Ar)
+	//~ G4double particleEnergy = 6.965*eV; //(178nm for Xe) 
 	generic_messenger -> DeclareProperty("particleEnergy", particleEnergy,"Energy of the generated particle");
 	
 	
@@ -401,7 +402,7 @@ const std::string filename_event_2 = "nan.txt";
     run_manager -> SetUserInitialization(physics_list);
     
     //G4ParticleTable needs to be call after G4VUserPhysicsList is instantiated and assigned to G4RunManager
-	auto opticalphoton = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, random_generator_inside_S1({}), generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
+	auto opticalphoton = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, random_generator_inside_S2({}), generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
 		//auto opticalphoton_test = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, {0., 0., fixed_z}, generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
 		//auto box_source = [](auto event){generate_particles_in_event(event, {0., 0., 167.6775*mm + 50.*mm}, generate_partilces_and_energies_tuples());};  //From the box_source
 		//auto kr83m = [](auto event){generate_ion_decay(event, random_generator_inside_drift({}), 0);}; 

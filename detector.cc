@@ -44,8 +44,9 @@ bool process_hits_anode(G4Step *step){
 bool process_hits(G4Step *step){	
     field_cage_parameters fcp = version2_parameters();
 				
-	const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_10000000.txt";
-	//~ const std::string& filename_map = "files_OneSiPM/nan.txt";
+	//~ const std::string& filename_map = "files_4SiPM/OP_Ar_128nm_S2_Z5mm_0mm_5000000.txt";
+	const std::string& filename_map = "files_OneSiPM/v3_MESH_RAD/OP_Ar_128nm_S2_Z5mm_10000000_v2.txt";
+	//~ const std::string& filename_map = "files_OneSiPM/v3_MESH_RAD/random_test6.txt";
 	G4Track* track = step -> GetTrack();
 	G4String particleType = track->GetDefinition()->GetParticleName();			
 	G4int hits_check = 0;
@@ -89,7 +90,7 @@ bool process_hits(G4Step *step){
 bool process_hits_genratorCHECK(G4Step *step){	
     field_cage_parameters fcp = version2_parameters();
 				
-	const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_10000000_generatorCHECK.txt";
+	const std::string& filename_map = "files_OneSiPM/OpticalPhoton_420nm_S1_5mm_1000000_generatorCHECK.txt";
 	G4Track* track = step -> GetTrack();
 	G4String particleType = track->GetDefinition()->GetParticleName();			
 	G4int hits_check = 0;

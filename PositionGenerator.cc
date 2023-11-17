@@ -33,22 +33,32 @@ G4ThreeVector random_generator_inside_S1(std::optional<G4double> fixed_z){
 
 G4ThreeVector random_generator_inside_S2(std::optional<G4double> fixed_z){    
 	field_cage_parameters fcp = version2_parameters();
-	
-    //~ auto zmin  = fcp.cathode_z + fcp.mesh_thickn/2;
-    //~ auto zmax  = fcp.gate_z    - fcp.mesh_thickn/2;
-    //~ auto rmax  = fcp.cathBracket_rad + fcp.cathBracket_thickn;
-    
+	    
     auto zmin  = fcp.S2_z - fcp.S2_lenght/2; 
     auto zmax  = fcp.S2_z + fcp.S2_lenght/2; 
     auto rmax  = fcp.S2_rad;
     
-    auto r     = G4RandFlat::shoot(0.,   rmax);
-    auto angle = G4RandFlat::shoot(0., 2*M_PI);
-    auto z     = G4RandFlat::shoot(zmin, zmax);
-
-    auto pos_x = r * cos(angle);
-    auto pos_y = r * sin(angle);
-    auto pos_z = z;
+    auto pos_x = 90.;
+	auto pos_y = 90.;
+	auto pos_z = 90.;
+	auto rad   = 100.;
+    
+    while (rad >= rmax) {    
+	  //~ G4cout << "******************************* " << "HELP " << rad << " *******************************"  << G4endl;
+      //~ auto r     = G4RandFlat::shoot(0.,   rmax);
+      //~ auto angle = G4RandFlat::shoot(0., 2*M_PI);
+      //~ auto z     = G4RandFlat::shoot(zmin, zmax);
+      auto x     = G4RandFlat::shoot(-rmax,   rmax);
+      auto y     = G4RandFlat::shoot(-rmax,   rmax);
+      auto z     = G4RandFlat::shoot( zmin,   zmax);
+	  rad = sqrt(pow(x,2) + pow(y,2));
+	  if (rad <= rmax) {
+        pos_x = x;
+		pos_y = y;
+		pos_z = z;
+	    //~ G4cout << "******************************* " << "ADDED " << pos_x << " " << pos_y << " *******************************"  << G4endl;
+	  }
+    }
    
    return {pos_x, pos_y, pos_z};
 }
