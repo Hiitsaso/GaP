@@ -120,17 +120,22 @@
 #
 /vis/geometry/set/colour all 0 1 1 1 0.9
 /vis/geometry/set/colour  world 0 0 0 0.4 0.5
-/vis/geometry/set/colour cathode 0 0.5 0 0 0.9
-/vis/geometry/set/colour CathodeBracket 0 1 0 0 0.9
+/vis/geometry/set/colour Cath 0 0.5 0 0 0.9
+/vis/geometry/set/colour CathRing0 0 0.7 0 0 0.9
+/vis/geometry/set/colour CathRing1 0 0.7 0 0 0.9
+/vis/geometry/set/colour CathRing2 0 0.7 0 0 0.9
+/vis/geometry/set/colour CathRing3 0 0.7 0 0 0.9
+/vis/geometry/set/colour CathBracket 0 7 0 0 0.9
 /vis/geometry/set/colour Anode 0 0 0 0.5 0.9
 /vis/geometry/set/colour AnodeBracket 0 0 0 1 0.9
 /vis/geometry/set/colour gas_drift 0 1 1 0.4 0.4
 /vis/geometry/set/colour gas_el 0 0.8 0.8 0.4 0.4
-/vis/geometry/set/colour gateBracket 0 1 0 1 0.9
-/vis/geometry/set/colour gate 0 0.5 0 0.5 0.9
+/vis/geometry/set/colour GateBracket 0 1 0 1 0.9
+/vis/geometry/set/colour Gate 0 0.5 0 0.5 0.9
 /vis/geometry/set/colour ring 0 0.56 0.28 0 0.9
 #/vis/geometry/set/colour GasVessel 0 1 1 1 0.2
 #/vis/geometry/set/colour vessel_steel 0 1 1 1 0.2
+#/vis/geometry/set/colour RadioactiveSourceEncapsulation 0 1 1 0 0.9
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
 /vis/verbose warnings
