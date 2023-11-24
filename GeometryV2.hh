@@ -24,9 +24,9 @@ struct field_cage_parameters {
   G4double gateBracket_rad;
   G4double gateBracket_thickn;
   G4double meshBracket_length;
-  G4double anodeBracket_rad;
-  G4double anodeBracket_thickn;
-  G4double anodeBracket_length;
+  G4double cathBracket_rad;
+  G4double cathBracket_thickn;
+  G4double cathBracket_length;
   
   G4double pmt_rad;
   
@@ -117,13 +117,13 @@ struct field_cage_parameters {
   G4double cathode_z;
   G4double gateBracket_z;
   G4double gate_z;
-  G4double anodeBracket_z;
+  G4double cathBracket_z;
   
   G4double teflon_cage_z;
   G4double TPB_tefloncage_z;
   G4double long_ring_z;
   G4double teflon_ring_z;
-  G4double anode_ring_z;
+  G4double cath_ring_z;
   G4double ring0_z;
   
   G4double pmt_z;
