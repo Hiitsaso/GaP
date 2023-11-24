@@ -123,7 +123,7 @@ struct field_cage_parameters {
   G4double TPB_tefloncage_z;
   G4double long_ring_z;
   G4double teflon_ring_z;
-  G4double cathode_ring_z;
+  G4double anode_ring_z;
   G4double ring0_z;
   
   G4double pmt_z;

@@ -181,7 +181,7 @@ field_cage_parameters version2_parameters() {
   fcp.TPB_tefloncage_z = fcp.teflon_cage_z  - (fcp.ring_length - fcp.anodeBracket_length)/2;
   fcp.long_ring_z      = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2; 
   fcp.teflon_ring_z    = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2 - fcp.ring_length/4; 
-  fcp.cathode_ring_z   = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2 + fcp.ring_length/4; 
+  fcp.anode_ring_z   = fcp.anodeBracket_z - (fcp.ring_length - fcp.anodeBracket_length)/2 + fcp.ring_length/4; 
   fcp.ring0_z          = fcp.long_ring_z    + fcp.rings_length/2  -  fcp.ring_bottom_to_ring0_bottom - fcp.ring0_length/2; 
   
   //~ fcp.pmt_z             = - (12.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathodeBracket_z; //old position of the PMTs
@@ -366,11 +366,11 @@ void place_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) {
   //Cathode mesh 
   n4::tubs("Cathode").r(fcp.mesh_rad).z(fcp.mesh_thickn).place(mesh_mat).in(vessel).at_z(fcp.cathode_z).check_overlaps().now();
 
-  //"Cathode" rings (only half of the rings plus the one inside)
-  n4::tubs("CathodeRing0").r(      fcp.ring1_rad).z(fcp.ring0_length).place(steel).in(vessel).at_z(fcp.ring0_z).check_overlaps().now();
-  n4::tubs("CathodeRing1").r_inner(fcp.ring1_rad).r_delta(fcp.ring1_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
-  n4::tubs("CathodeRing2").r_inner(fcp.ring2_rad).r_delta(fcp.ring2_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
-  n4::tubs("CathodeRing3").r_inner(fcp.ring3_rad).r_delta(fcp.ring3_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.cathode_ring_z).check_overlaps().now();
+  //"Anode" rings (only half of the rings plus the one inside)
+  n4::tubs("AnodeRing0").r(      fcp.ring1_rad).z(fcp.ring0_length).place(steel).in(vessel).at_z(fcp.ring0_z).check_overlaps().now();
+  n4::tubs("AnodeRing1").r_inner(fcp.ring1_rad).r_delta(fcp.ring1_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.anode_ring_z).check_overlaps().now();
+  n4::tubs("AnodeRing2").r_inner(fcp.ring2_rad).r_delta(fcp.ring2_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.anode_ring_z).check_overlaps().now();
+  n4::tubs("AnodeRing3").r_inner(fcp.ring3_rad).r_delta(fcp.ring3_thickn).z(fcp.ring_length/2).place(steel).in(vessel).at_z(fcp.anode_ring_z).check_overlaps().now();
   
   //Gate bracket
   n4::tubs("GateBracket").r_inner(fcp.gateBracket_rad).r_delta(fcp.gateBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.gateBracket_z).check_overlaps().now();
@@ -432,7 +432,7 @@ void place_S1_and_S2_in(G4LogicalVolume* vessel, field_cage_parameters const & f
   //S1 zone
   auto S1_logic = 	  
   /*      */n4::tubs("S1_full").r(fcp.S1_rad).z(fcp.S1_lenght)
-  .subtract(n4::tubs("CathodeRing_0_tosubtact").r(fcp.ring1_rad).z(fcp.ring0_length)).at_z(fcp.ring0_z - fcp.S1_z) //Relative positions
+  .subtract(n4::tubs("AnodeRing_0_tosubtact").r(fcp.ring1_rad).z(fcp.ring0_length)).at_z(fcp.ring0_z - fcp.S1_z) //Relative positions
   .name("S1").volume(gas);
   
   //~ auto sensitive_detector_2 = new n4::sensitive_detector("S1Detector", process_hits_genratorCHECK);
