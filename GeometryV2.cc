@@ -78,11 +78,11 @@ field_cage_parameters version2_parameters() {
   fcp.mesh_thickn       = 0.075   *mm;
   fcp.mesh_transparency = 0.95;
 
-  fcp.cathodeBracket_rad      = 120./2  *mm;
-  fcp.cathodeBracket_thickn   = 20.     *mm;
+  fcp.anodeBracket_rad      = 120./2  *mm;
+  fcp.anodeBracket_thickn   = 20.     *mm;
   fcp.gateBracket_rad      = 120./2  *mm;
   fcp.gateBracket_thickn   = 30.     *mm;
-  fcp.meshBracket_length   = 5.      *mm; //cathode=gate
+  fcp.meshBracket_length   = 5.      *mm; //anode=gate
   fcp.cathBracket_rad     = 120./2  *mm;
   fcp.cathBracket_thickn  = 30.     *mm;
   fcp.cathBracket_length  = 4.      *mm; 
@@ -147,7 +147,7 @@ field_cage_parameters version2_parameters() {
   fcp.SiPMs_cage_long    = 15.  *mm; 
   fcp.SiPMs_cage_short   = 15.  *mm; 
   fcp.SiPMs_cage_thickn  = 2.   *mm; 
-  fcp.cathode_to_SiPMs      = 5.   *mm; 
+  fcp.anode_to_SiPMs      = 5.   *mm; 
   
   fcp.SiPM_between_long  = 0. *mm;
   fcp.SiPM_between_short = 0. *mm;
@@ -161,8 +161,8 @@ field_cage_parameters version2_parameters() {
   fcp.drift_length = 87 *mm; // ||   |-|-------------------||
   fcp.el_length    = 10 *mm; // ||---| |                   ||
   
-  fcp.S2_rad    = fcp.cathodeBracket_rad + fcp.cathodeBracket_thickn;
-  fcp.S2_lenght = fcp.el_length - 2*fcp.mesh_thickn; //Since the meshes are outside of the cathode/gate Brackets
+  fcp.S2_rad    = fcp.anodeBracket_rad + fcp.anodeBracket_thickn;
+  fcp.S2_lenght = fcp.el_length - 2*fcp.mesh_thickn; //Since the meshes are outside of the anode/gate Brackets
   
   fcp.S1_rad    = fcp.teflon_cage_rad - fcp.TPB_tefloncage_thickn; 
   fcp.S1_lenght = fcp.drift_length;  
@@ -171,9 +171,9 @@ field_cage_parameters version2_parameters() {
   //POSITIONS(faltan por medir)
   fcp.vessel_z = fcp.vessel_length/2 - (163.5*mm + fcp.meshBracket_length);
   
-  fcp.cathodeBracket_z  = -fcp.vessel_z; //From the vessel (and at the origin or the world)
-  fcp.cathode_z      = fcp.cathodeBracket_z + fcp.meshBracket_length/2 + fcp.mesh_thickn/2; 
-  fcp.gateBracket_z  = fcp.cathodeBracket_z + fcp.meshBracket_length   + fcp.el_length;
+  fcp.anodeBracket_z  = -fcp.vessel_z; //From the vessel (and at the origin or the world)
+  fcp.anode_z      = fcp.anodeBracket_z + fcp.meshBracket_length/2 + fcp.mesh_thickn/2; 
+  fcp.gateBracket_z  = fcp.anodeBracket_z + fcp.meshBracket_length   + fcp.el_length;
   fcp.gate_z         = fcp.gateBracket_z - fcp.meshBracket_length/2 - fcp.mesh_thickn/2;
   fcp.cathBracket_z = fcp.gateBracket_z + fcp.meshBracket_length/2 + fcp.drift_length + fcp.cathBracket_length/2;
   
@@ -184,19 +184,19 @@ field_cage_parameters version2_parameters() {
   fcp.cath_ring_z   = fcp.cathBracket_z - (fcp.ring_length - fcp.cathBracket_length)/2 + fcp.ring_length/4; 
   fcp.ring0_z          = fcp.long_ring_z    + fcp.rings_length/2  -  fcp.ring_bottom_to_ring0_bottom - fcp.ring0_length/2; 
   
-  //~ fcp.pmt_z             = - (12.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathodeBracket_z; //old position of the PMTs
-  fcp.pmt_z                 = - (2.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.cathodeBracket_z;  //new position of the PMTs (2mm from the cath)
-  fcp.plateUp_pmt_z         = - ( 150.5*mm + fcp.meshBracket_length/2 + fcp.plateUp_pmt_length/2) + fcp.cathodeBracket_z;
+  //~ fcp.pmt_z             = - (12.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.anodeBracket_z; //old position of the PMTs
+  fcp.pmt_z                 = - (2.*mm + fcp.meshBracket_length/2 + fcp.pmt_length/2) + fcp.anodeBracket_z;  //new position of the PMTs (2mm from the cath)
+  fcp.plateUp_pmt_z         = - ( 150.5*mm + fcp.meshBracket_length/2 + fcp.plateUp_pmt_length/2) + fcp.anodeBracket_z;
   fcp.enclosure_pmt_z       = fcp.plateUp_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plateUp_pmt_length/2;
   fcp.plate_pmt_z           = fcp.enclosure_pmt_z + fcp.enclosure_pmt_length/2 + fcp.plate_pmt_length/2;
   fcp.PMTplateBottom1_pos_z = fcp.pmt_z;
   
-  fcp.SiPMs_z = fcp.cathodeBracket_z - fcp.meshBracket_length/2 - fcp.cathode_to_SiPMs;
+  fcp.SiPMs_z = fcp.anodeBracket_z - fcp.meshBracket_length/2 - fcp.anode_to_SiPMs;
    
   fcp.drift_z = fcp.gateBracket_z + fcp.meshBracket_length + fcp.drift_length/2; //not useful
-  fcp.el_z    = fcp.cathodeBracket_z + fcp.meshBracket_length + fcp.el_length/2;    //not useful
+  fcp.el_z    = fcp.anodeBracket_z + fcp.meshBracket_length + fcp.el_length/2;    //not useful
   
-  fcp.S2_z    = fcp.cathode_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2; 
+  fcp.S2_z    = fcp.anode_z + fcp.mesh_thickn/2 + fcp.S2_lenght/2; 
   fcp.S1_z    = fcp.gate_z + fcp.mesh_thickn/2 + fcp.S1_lenght/2;
   
   fcp.encapsulation_z = fcp.ring0_z + (fcp.ring0_length + fcp.encapsulation_length)/2;
@@ -360,11 +360,11 @@ void place_pmt_holder_in(G4LogicalVolume* vessel, field_cage_parameters const & 
 }
 
 void place_cage_in(G4LogicalVolume* vessel, field_cage_parameters const & fcp) { 
-  //Cathode bracket
-  n4::tubs("CathodeBracket").r_inner(fcp.cathodeBracket_rad).r_delta(fcp.cathodeBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.cathodeBracket_z).check_overlaps().now();
+  //Anode bracket
+  n4::tubs("AnodeBracket").r_inner(fcp.anodeBracket_rad).r_delta(fcp.anodeBracket_thickn).z(fcp.meshBracket_length).place(steel).in(vessel).at_z(fcp.anodeBracket_z).check_overlaps().now();
   
-  //Cathode mesh 
-  n4::tubs("Cathode").r(fcp.mesh_rad).z(fcp.mesh_thickn).place(mesh_mat).in(vessel).at_z(fcp.cathode_z).check_overlaps().now();
+  //Anode mesh 
+  n4::tubs("Anode").r(fcp.mesh_rad).z(fcp.mesh_thickn).place(mesh_mat).in(vessel).at_z(fcp.anode_z).check_overlaps().now();
 
   //"Cath" rings (only half of the rings plus the one inside)
   n4::tubs("CathRing0").r(      fcp.ring1_rad).z(fcp.ring0_length).place(steel).in(vessel).at_z(fcp.ring0_z).check_overlaps().now();
