@@ -19,8 +19,8 @@ struct field_cage_parameters {
   G4double mesh_thickn;
   G4double mesh_transparency;
     
-  G4double cathBracket_rad;
-  G4double cathBracket_thickn;
+  G4double cathodeBracket_rad;
+  G4double cathodeBracket_thickn;
   G4double gateBracket_rad;
   G4double gateBracket_thickn;
   G4double meshBracket_length;
@@ -89,7 +89,7 @@ struct field_cage_parameters {
   G4double SiPMs_cage_long;
   G4double SiPMs_cage_short;
   G4double SiPMs_cage_thickn;
-  G4double cath_to_SiPMs;
+  G4double cathode_to_SiPMs;
   
   G4double SiPM_between_long;
   G4double SiPM_between_short;
@@ -113,7 +113,7 @@ struct field_cage_parameters {
   
   //POSITIONS
   G4double vessel_z; 
-  G4double cathBracket_z;
+  G4double cathodeBracket_z;
   G4double cathode_z;
   G4double gateBracket_z;
   G4double gate_z;
