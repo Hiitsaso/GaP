@@ -414,9 +414,9 @@ const std::string filename_event_2 = "nan.txt";
 		//auto kr83m_nexus= [](auto event){ kr83_generator(event, 32.1473*keV, 9.396*keV,  0.0490, 154.*ns); }; 
 	auto vessel_out_rad_ = 288./2  *mm;
 	auto encapsulation_lenght = 3.*mm; 
-	auto encapsulation_z = fcp.cathode_z + 0.075*mm + encapsulation_lenght/2;
+	auto encapsulation_z = fcp.anode_z + 0.075*mm + encapsulation_lenght/2;
 	//~ auto ion = [vessel_out_rad_](auto event){generate_ion_decay(event, {vessel_out_rad_*cos(0.), vessel_out_rad_*sin(0.), 0.}, 0);};  //From the surface
-	//~ auto ion = [encapsulation_z](auto event){generate_ion_decay(event, {0., 0., encapsulation_z}, 0);};  //From the surface of the cathode
+	//~ auto ion = [encapsulation_z](auto event){generate_ion_decay(event, {0., 0., encapsulation_z}, 0);};  //From the surface of the anode
 
     
     run_manager -> SetUserInitialization((new n4::actions{opticalphoton})
