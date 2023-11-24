@@ -385,7 +385,12 @@ const std::string filename_event_2 = "nan.txt";
 
 	auto generic_messenger = new G4GenericMessenger(nullptr,"/beam/", "Particle beam generator");
 	field_cage_parameters fcp = version2_parameters();
-	G4double fixed_z = 5. *cm;
+	G4int contador = 4;
+	G4double fixed_x = contador*15./4 *mm;
+	G4double fixed_y = contador*15./4 *mm;
+	G4double fixed_z = fcp.vessel_z + fcp.S2_z;
+	generic_messenger -> DeclareProperty("fixed_x", fixed_x,"position of the generated particle in the x direction");
+	generic_messenger -> DeclareProperty("fixed_y", fixed_y,"position of the generated particle in the y direction");
 	generic_messenger -> DeclareProperty("fixed_z", fixed_z,"position of the generated particle in the z direction");
 	G4String particleDefinition = "opticalphoton";
 	generic_messenger -> DeclareProperty("particleDefinition", particleDefinition,"Type of the generated particle");
@@ -402,7 +407,7 @@ const std::string filename_event_2 = "nan.txt";
     run_manager -> SetUserInitialization(physics_list);
     
     //G4ParticleTable needs to be call after G4VUserPhysicsList is instantiated and assigned to G4RunManager
-	auto opticalphoton = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, random_generator_inside_S2({}), generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
+	auto opticalphoton = [&fixed_x, &fixed_y, &fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, random_generator_inside_S2(fixed_x, fixed_y, fixed_z), generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
 		//auto opticalphoton_test = [&fixed_z, &particleDefinition, &particleEnergy](auto event){generate_particles_in_event(event, {0., 0., fixed_z}, generate_partilces_and_energies_tuples(particleDefinition, particleEnergy));};   	
 		//auto box_source = [](auto event){generate_particles_in_event(event, {0., 0., 167.6775*mm + 50.*mm}, generate_partilces_and_energies_tuples());};  //From the box_source
 		//auto kr83m = [](auto event){generate_ion_decay(event, random_generator_inside_drift({}), 0);}; 

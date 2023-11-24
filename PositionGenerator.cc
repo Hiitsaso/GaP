@@ -31,7 +31,7 @@ G4ThreeVector random_generator_inside_S1(std::optional<G4double> fixed_z){
    return {pos_x, pos_y, pos_z};
 }
 
-G4ThreeVector random_generator_inside_S2(std::optional<G4double> fixed_z){    
+G4ThreeVector random_generator_inside_S2(std::optional<G4double> fixed_x, std::optional<G4double> fixed_y, std::optional<G4double> fixed_z){    
 	field_cage_parameters fcp = version2_parameters();
 	    
     auto zmin  = fcp.S2_z - fcp.S2_lenght/2; 
@@ -48,9 +48,15 @@ G4ThreeVector random_generator_inside_S2(std::optional<G4double> fixed_z){
       //~ auto r     = G4RandFlat::shoot(0.,   rmax);
       //~ auto angle = G4RandFlat::shoot(0., 2*M_PI);
       //~ auto z     = G4RandFlat::shoot(zmin, zmax);
-      auto x     = G4RandFlat::shoot(-rmax,   rmax);
-      auto y     = G4RandFlat::shoot(-rmax,   rmax);
-      auto z     = G4RandFlat::shoot( zmin,   zmax);
+      auto x     = fixed_x.has_value()
+                 ? fixed_x.value()
+                 : G4RandFlat::shoot(-rmax, rmax);
+      auto y     = fixed_y.has_value()
+                 ? fixed_y.value()
+                 : G4RandFlat::shoot(-rmax, rmax);
+      auto z     = fixed_z.has_value()
+                 ? fixed_z.value()
+                 : G4RandFlat::shoot(zmin, zmax);
 	  rad = sqrt(pow(x,2) + pow(y,2));
 	  if (rad <= rmax) {
         pos_x = x;

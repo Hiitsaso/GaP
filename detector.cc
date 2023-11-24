@@ -45,7 +45,8 @@ bool process_hits(G4Step *step){
     field_cage_parameters fcp = version2_parameters();
 				
 	//~ const std::string& filename_map = "files_4SiPM/OP_Ar_128nm_S2_Z5mm_0mm_5000000.txt";
-	const std::string& filename_map = "files_OneSiPM/v3_MESH_RAD/OP_Ar_128nm_S2_Z5mm_10000000_v2.txt";
+	const std::string& filename_map = "files_OneSiPM/v3_MESH_RAD/OP_Ar_128nm_S2_Z5mm_10000000_fixed{4_4_S2z}.txt";
+	//~ const std::string& filename_map = "files_OneSiPM/v3_MESH_RAD/test.txt";
 	//~ const std::string& filename_map = "files_OneSiPM/v3_MESH_RAD/random_test6.txt";
 	G4Track* track = step -> GetTrack();
 	G4String particleType = track->GetDefinition()->GetParticleName();			

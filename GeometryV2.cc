@@ -458,12 +458,12 @@ G4PVPlacement* GeometryV2() {
   auto vessel_placement = n4::place(vessel).in(world).at_z(fcp.vessel_z).check_overlaps().now();
   
   //bool1 = TPBon ; bool2 = OpticalSurfaceON
-  place_pmt_holder_in(vessel, fcp, false, false, "PMT"); //SiPM or PMT
+  place_pmt_holder_in(vessel, fcp, false, false, "SiPM"); //SiPM or PMT
   place_cage_in(vessel, fcp);
   place_teflon_cage_in(vessel, vessel_placement, fcp, false, false);
-  //place_rings_in(vessel, fcp);
-  place_encapsulation_in(vessel, fcp);
-  //place_S1_and_S2_in(vessel, fcp);
+  place_rings_in(vessel, fcp);
+  //place_encapsulation_in(vessel, fcp);
+  place_S1_and_S2_in(vessel, fcp);
   //place_Pb_box_in(vessel, fcp);
   
   return n4::place(world).now();
